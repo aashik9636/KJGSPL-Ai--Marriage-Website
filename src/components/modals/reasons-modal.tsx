@@ -245,7 +245,7 @@ export const ReasonsModal: React.FC<ReasonsModalProps> = ({
 
           {/* Story Quote */}
           <p style={{ fontSize: "12.5px", lineHeight: 1.55, color: "#4a323c", margin: 0 }}>
-            "{activeStory.quote}"
+            &ldquo;{activeStory.quote}&rdquo;
           </p>
 
           {/* Highlights Tag List */}

@@ -23,7 +23,7 @@ export const ShowcaseSection: React.FC<ShowcaseSectionProps> = ({
   useEffect(() => {
     const updateTime = () => {
       const now = new Date();
-      let hours = now.getHours();
+      const hours = now.getHours();
       const minutes = now.getMinutes();
       const formattedHours = hours % 12 || 12;
       const formattedMinutes = minutes < 10 ? `0${minutes}` : `${minutes}`;
