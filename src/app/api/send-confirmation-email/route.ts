@@ -166,8 +166,12 @@ export async function POST(request: Request) {
 
     if (smtpHost && smtpUser && smtpPass) {
       try {
-        const nodemailer = await import("nodemailer");
-        const transporter = nodemailer.createTransport({
+        const importModule = new Function("m", "return import(m)");
+        const nodemailerModule = await importModule("nodemailer").catch(() => null);
+        if (!nodemailerModule) {
+          throw new Error("nodemailer package not installed");
+        }
+        const transporter = (nodemailerModule.default || nodemailerModule).createTransport({
           host: smtpHost,
           port: parseInt(process.env.SMTP_PORT || "587"),
           secure: process.env.SMTP_SECURE === "true",
