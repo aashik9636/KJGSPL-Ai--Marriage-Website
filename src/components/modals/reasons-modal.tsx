@@ -83,32 +83,142 @@ export const ReasonsModal: React.FC<ReasonsModalProps> = ({
     >
       <style>{`
         .visual-switch-btn {
-          transition: all 0.2s ease;
+          transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
         }
         .visual-switch-btn:hover {
-          background: #f7ece8 !important;
-          border-color: #dcaea5 !important;
+          background: #fdf2f4 !important;
+          border-color: #be185d !important;
+          transform: translateY(-1px);
+        }
+        .visual-switch-btn.active {
+          background: #411c2b !important;
+          border-color: #411c2b !important;
+          color: #fffaf6 !important;
+          box-shadow: 0 4px 14px rgba(65, 28, 43, 0.25) !important;
         }
         .reasons-cta-btn:hover {
           background: #5a273b !important;
-          transform: translateY(-1px);
+          transform: translateY(-2px);
+          box-shadow: 0 6px 18px rgba(65, 28, 43, 0.25);
         }
         .visual-story-split-card {
           display: grid;
           grid-template-columns: 1.15fr 1fr;
-          border-radius: 18px;
+          border-radius: 22px;
           overflow: hidden;
-          border: 1.5px solid #ebd8d4;
+          border: 1px solid rgba(65, 28, 43, 0.12);
+          background: linear-gradient(135deg, #ffffff 0%, #fdf8f6 100%);
+          box-shadow: 0 10px 30px rgba(65, 28, 43, 0.06), 0 1px 3px rgba(0,0,0,0.02);
+          min-height: 255px;
+          transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .visual-story-split-card:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 16px 36px rgba(65, 28, 43, 0.1);
+          border-color: rgba(190, 24, 93, 0.22);
+        }
+        .visual-story-image-wrap {
+          position: relative;
+          overflow: hidden;
+          border-radius: 16px;
+          margin: 8px;
+          background: #220e18;
+        }
+        .visual-story-img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          object-position: center 30%;
+          display: block;
+          transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .visual-story-split-card:hover .visual-story-img {
+          transform: scale(1.04);
+        }
+        .floating-photo-badge {
+          position: absolute;
+          top: 10px;
+          left: 10px;
+          background: rgba(255, 255, 255, 0.9);
+          backdrop-filter: blur(8px);
+          border: 1px solid rgba(255, 255, 255, 0.8);
+          border-radius: 20px;
+          padding: 3px 9px;
+          font-size: 9px;
+          font-weight: 800;
+          letter-spacing: 0.08em;
+          color: #9d174d;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+          z-index: 2;
+        }
+        .floating-synergy-pill {
+          position: absolute;
+          bottom: 10px;
+          left: 10px;
+          background: rgba(43, 17, 28, 0.85);
+          backdrop-filter: blur(8px);
+          border: 1px solid rgba(255, 255, 255, 0.15);
+          border-radius: 20px;
+          padding: 3.5px 10px;
+          display: inline-flex;
+          align-items: center;
+          gap: 5px;
+          color: #fff9f2;
+          font-size: 9.5px;
+          font-weight: 700;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+          z-index: 2;
+        }
+        .floating-pulse-dot {
+          width: 5px;
+          height: 5px;
+          border-radius: 50%;
+          background: #10b981;
+          box-shadow: 0 0 6px #10b981;
+        }
+        .modern-highlight-pill {
+          display: inline-flex;
+          align-items: center;
+          gap: 5px;
+          font-size: 10.5px;
+          font-weight: 600;
+          color: #4a323c;
           background: #ffffff;
-          box-shadow: 0 6px 22px rgba(65, 28, 43, 0.05);
-          min-height: 250px;
+          padding: 4px 10px;
+          border-radius: 8px;
+          border: 1px solid #ebdcd5;
+          box-shadow: 0 1px 3px rgba(65, 28, 43, 0.03);
+          transition: all 0.2s ease;
+        }
+        .modern-highlight-pill:hover {
+          background: #fff8f6;
+          border-color: #be185d;
+          color: #832646;
+          transform: translateY(-1px);
+        }
+        .mini-dynamic-card {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          background: #ffffff;
+          border: 1px solid rgba(65, 28, 43, 0.1);
+          border-radius: 14px;
+          padding: 10px 14px;
+          box-shadow: 0 2px 8px rgba(65, 28, 43, 0.03);
+          transition: all 0.22s ease;
+        }
+        .mini-dynamic-card:hover {
+          transform: translateY(-2px);
+          border-color: #be185d;
+          box-shadow: 0 6px 16px rgba(190, 24, 93, 0.08);
         }
         @media (max-width: 720px) {
           .visual-story-split-card {
             grid-template-columns: 1fr;
           }
           .visual-story-image-wrap {
-            height: 210px !important;
+            height: 220px !important;
+            margin: 6px;
           }
         }
       `}</style>
@@ -146,89 +256,67 @@ export const ReasonsModal: React.FC<ReasonsModalProps> = ({
 
       {/* Visual Story Selector Tabs */}
       <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-        {VISUAL_STORIES.map((story, idx) => (
-          <button
-            key={story.id}
-            type="button"
-            className="visual-switch-btn"
-            onClick={() => setSelectedStory(idx)}
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "7px",
-              padding: "7px 14px",
-              background: selectedStory === idx ? "#411c2b" : "#ffffff",
-              borderColor: selectedStory === idx ? "#411c2b" : "#dfccc5",
-              borderWidth: "1.5px",
-              borderStyle: "solid",
-              borderRadius: "999px",
-              fontSize: "12px",
-              fontWeight: 600,
-              color: selectedStory === idx ? "#fff9f2" : "#5c414b",
-              cursor: "pointer",
-              boxShadow: selectedStory === idx ? "0 4px 12px rgba(65, 28, 43, 0.2)" : "none"
-            }}
-          >
-            <span>{story.title}</span>
-          </button>
-        ))}
+        {VISUAL_STORIES.map((story, idx) => {
+          const isSelected = selectedStory === idx;
+          return (
+            <button
+              key={story.id}
+              type="button"
+              className={`visual-switch-btn ${isSelected ? "active" : ""}`}
+              onClick={() => setSelectedStory(idx)}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "7px",
+                padding: "7px 15px",
+                background: isSelected ? "#411c2b" : "#ffffff",
+                borderColor: isSelected ? "#411c2b" : "#dfccc5",
+                borderWidth: "1.5px",
+                borderStyle: "solid",
+                borderRadius: "999px",
+                fontSize: "12px",
+                fontWeight: 600,
+                color: isSelected ? "#fff9f2" : "#5c414b",
+                cursor: "pointer",
+              }}
+            >
+              <span>{story.title}</span>
+            </button>
+          );
+        })}
       </div>
 
-      {/* Main Visual Showcase Card: Side-by-Side (Image Left, Story Right) */}
-      <div className="visual-story-split-card">
-        {/* Left Side: Photo */}
-        <div 
-          className="visual-story-image-wrap"
-          style={{
-            position: "relative",
-            width: "100%",
-            height: "100%",
-            minHeight: "240px",
-            overflow: "hidden",
-            background: "#220e18"
-          }}
-        >
+      {/* Main Visual Showcase Card: Side-by-Side (Modern Inset Bento) */}
+      <div className="visual-story-split-card" key={`story-card-${activeStory.id}`}>
+        {/* Left Side: Modern Inset Photo Frame */}
+        <div className="visual-story-image-wrap">
           <img 
             src={activeStory.image} 
             alt={activeStory.title}
-            style={{
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
-              objectPosition: "center 30%",
-              display: "block"
-            }}
+            className="visual-story-img"
           />
+          <div className="floating-photo-badge">
+            {activeStory.badge}
+          </div>
+          <div className="floating-synergy-pill">
+            <span className="floating-pulse-dot" />
+            <span>98% Complementary Synergy</span>
+          </div>
         </div>
 
-        {/* Right Side: Story Details */}
+        {/* Right Side: Modern Story Details */}
         <div 
           style={{
-            padding: "20px 22px",
+            padding: "18px 20px",
             display: "flex",
             flexDirection: "column",
             justifyContent: "center",
             gap: "10px",
-            background: "#ffffff"
           }}
         >
-          {/* Top Row: Badge & Dynamics Tag */}
+          {/* Top Dynamics Tag */}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "6px" }}>
-            <span 
-              style={{
-                fontSize: "9.5px",
-                fontWeight: 800,
-                letterSpacing: "0.08em",
-                color: "#9d174d",
-                background: "#fce7f3",
-                padding: "3px 9px",
-                borderRadius: "999px"
-              }}
-            >
-              {activeStory.badge}
-            </span>
-
-            <div style={{ display: "flex", alignItems: "center", gap: "4px", background: "#f8ece7", padding: "3.5px 9px", borderRadius: "999px", border: "1px solid #ebdcd5" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "4px", background: "#f8ece7", padding: "4px 10px", borderRadius: "999px", border: "1px solid #ebdcd5" }}>
               <Icon1 size={12} style={{ color: "#724752" }} />
               <Plus size={9} style={{ color: "#c59b6d" }} />
               <Icon2 size={12} style={{ color: "#724752" }} />
@@ -239,34 +327,23 @@ export const ReasonsModal: React.FC<ReasonsModalProps> = ({
           </div>
 
           {/* Story Heading */}
-          <h4 style={{ fontFamily: "Georgia, serif", fontSize: "17px", fontWeight: 700, color: "#411c2b", margin: 0, lineHeight: 1.25 }}>
+          <h4 style={{ fontFamily: "Georgia, serif", fontSize: "18px", fontWeight: 700, color: "#411c2b", margin: 0, lineHeight: 1.25 }}>
             {activeStory.title}
           </h4>
 
           {/* Story Quote */}
-          <p style={{ fontSize: "12.5px", lineHeight: 1.55, color: "#4a323c", margin: 0 }}>
+          <p style={{ fontSize: "12.5px", lineHeight: 1.55, color: "#4a323c", margin: 0, fontStyle: "italic" }}>
             &ldquo;{activeStory.quote}&rdquo;
           </p>
 
           {/* Highlights Tag List */}
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "5px", paddingTop: "2px" }}>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", paddingTop: "2px" }}>
             {activeStory.highlights.map((item, hIdx) => (
               <span 
                 key={hIdx}
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "4px",
-                  fontSize: "10px",
-                  fontWeight: 600,
-                  color: "#4a323c",
-                  background: "#faf4f0",
-                  padding: "3px 8px",
-                  borderRadius: "6px",
-                  border: "1px solid #ebdcd5"
-                }}
+                className="modern-highlight-pill"
               >
-                <CheckCircle2 size={11} style={{ color: "#16a34a" }} />
+                <CheckCircle2 size={12} style={{ color: "#16a34a" }} />
                 <span>{item}</span>
               </span>
             ))}
@@ -281,16 +358,7 @@ export const ReasonsModal: React.FC<ReasonsModalProps> = ({
           return (
             <div 
               key={mIdx}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "10px",
-                background: "#ffffff",
-                border: "1.5px solid #ebd8d4",
-                borderRadius: "12px",
-                padding: "10px 14px",
-                boxShadow: "0 2px 8px rgba(65, 28, 43, 0.03)"
-              }}
+              className="mini-dynamic-card"
             >
               <span style={{ width: "30px", height: "30px", borderRadius: "8px", background: "#fdf2f4", color: "#9d174d", display: "grid", placeItems: "center", flexShrink: 0 }}>
                 <MIcon size={16} />

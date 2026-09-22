@@ -47,7 +47,7 @@ export const MomentsSection: React.FC<MomentsSectionProps> = ({
       <div className="moments-container">
         {/* Left Column: Copy & Interactive Tabs */}
         <div className="moments-copy">
-          <span className="eyebrow">REAL CONNECTION. REAL LIFE.</span>
+          <div className="eyebrow">05 / INTENTIONAL MATCHMAKING</div>
           <h2 id="moments-title">
             Made for the
             <br />

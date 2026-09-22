@@ -80,6 +80,7 @@ export const PhilosophySection: React.FC = () => {
 
       {/* Header Container */}
       <div className="philosophy-header">
+        <div className="eyebrow">01 / TRUE COMPATIBILITY PILLARS</div>
         <h2 className="philosophy-title">
           Attraction opens the door.
           <br />
@@ -104,8 +105,6 @@ export const PhilosophySection: React.FC = () => {
                 >
                   {/* Top Header Bar */}
                   <div className="wedding-card-top-bar">
-                    <span className="wedding-step-badge">{pillar.stepNum}</span>
-                    <span className="wedding-gold-bullet">✦</span>
                     <span className="wedding-category-text">{pillar.category}</span>
                   </div>
 

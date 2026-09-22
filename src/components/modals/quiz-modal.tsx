@@ -156,6 +156,8 @@ export const QuizModal: React.FC<QuizModalProps> = ({ onClose }) => {
   const [step, setStep] = useState<number>(0);
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [isCalculating, setIsCalculating] = useState(false);
+  const [calcPercent, setCalcPercent] = useState(0);
+  const [calcPhase, setCalcPhase] = useState("Initializing dynamic synthesis...");
 
   const totalQuestions = QUIZ_QUESTIONS.length;
   const currentQuestion = QUIZ_QUESTIONS[step];
@@ -167,11 +169,40 @@ export const QuizModal: React.FC<QuizModalProps> = ({ onClose }) => {
     if (step < totalQuestions - 1) {
       setStep(step + 1);
     } else {
+      // Start multi-phase animated calculation
       setIsCalculating(true);
-      setTimeout(() => {
-        setIsCalculating(false);
-        setStep(totalQuestions); // Results view
-      }, 1000);
+      setCalcPercent(0);
+      setCalcPhase("Analyzing tempo & recharge rhythms...");
+
+      const startTime = Date.now();
+      const duration = 2400; // 2.4s smooth animation
+
+      const interval = setInterval(() => {
+        const elapsed = Date.now() - startTime;
+        const progress = Math.min(1, elapsed / duration);
+        // easeOutCubic
+        const eased = 1 - Math.pow(1 - progress, 3);
+        const currentPct = Math.round(eased * 100);
+        setCalcPercent(currentPct);
+
+        if (progress < 0.28) {
+          setCalcPhase("Analyzing tempo & recharge rhythms...");
+        } else if (progress < 0.60) {
+          setCalcPhase("Mapping sanctuary energy & social depth...");
+        } else if (progress < 0.88) {
+          setCalcPhase("Synthesizing decision & horizon superpower...");
+        } else {
+          setCalcPhase("Unlocking your core relationship archetype ✨");
+        }
+
+        if (progress >= 1) {
+          clearInterval(interval);
+          setTimeout(() => {
+            setIsCalculating(false);
+            setStep(totalQuestions); // Results view
+          }, 350);
+        }
+      }, 35);
     }
   };
 
@@ -179,6 +210,7 @@ export const QuizModal: React.FC<QuizModalProps> = ({ onClose }) => {
     setAnswers({});
     setStep(0);
     setIsCalculating(false);
+    setCalcPercent(0);
   };
 
   const getResult = (): ArchetypeResult => {
@@ -186,232 +218,156 @@ export const QuizModal: React.FC<QuizModalProps> = ({ onClose }) => {
     return ARCHETYPES[key] || ARCHETYPES["default"];
   };
 
-  // Loading Calculation screen
+  // 1. Loading / Multi-stage AI Calculation Screen
   if (isCalculating) {
     return (
-      <div 
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: "16px",
-          padding: "40px 20px",
-          minHeight: "340px",
-          textAlign: "center"
-        }}
-      >
-        <div style={{ width: "60px", height: "60px", borderRadius: "50%", background: "#fce7f3", display: "grid", placeItems: "center", color: "#be185d" }}>
-          <Sparkles size={28} />
+      <div className="quiz-calc-stage animate-screen-fade">
+        {/* Animated Radar Halo Stage */}
+        <div className="quiz-calc-visual">
+          <div className="quiz-calc-halo ring-1" />
+          <div className="quiz-calc-halo ring-2" />
+          <div className="quiz-calc-center-icon">
+            <Sparkles size={28} className="calc-sparkle-pulse" />
+          </div>
         </div>
-        <h3 style={{ fontFamily: "Georgia, serif", fontSize: "22px", color: "#411c2b", margin: 0 }}>
-          Synthesizing Your Relationship Dynamic...
-        </h3>
-        <p style={{ fontSize: "13.5px", color: "#6b535d", maxWidth: "420px", margin: 0 }}>
-          Mapping your tempo, sanctuary energy, and decision preferences across our complementary compatibility model.
-        </p>
+
+        {/* Live Percent & Title */}
+        <div className="quiz-calc-header">
+          <span className="quiz-calc-number">{calcPercent}%</span>
+          <h3 className="quiz-calc-title">
+            Synthesizing Your Relationship Dynamic
+          </h3>
+          <p className="quiz-calc-desc">
+            Mapping your tempo, sanctuary energy, and decision preferences across our multi-dimensional compatibility formula.
+          </p>
+        </div>
+
+        {/* Progress Bar & Phase Ticker */}
+        <div className="quiz-calc-bar-box">
+          <div className="quiz-calc-progress-track">
+            <div 
+              className="quiz-calc-progress-fill" 
+              style={{ width: `${calcPercent}%` }}
+            />
+          </div>
+          <div className="quiz-calc-phase-text">
+            <span className="quiz-live-pulse-dot" />
+            <span>{calcPhase}</span>
+          </div>
+        </div>
       </div>
     );
   }
 
-  // Result Screen
+  // 2. Final Result Summary Screen
   if (step === totalQuestions) {
     const result = getResult();
     return (
-      <div 
-        className="quiz-result-view"
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "18px",
-          color: "#411c2b",
-          fontFamily: "Arial, Helvetica, sans-serif"
-        }}
-      >
-        {/* Header */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "4px", textAlign: "center", alignItems: "center" }}>
-          <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", fontSize: "11px", fontWeight: 800, letterSpacing: "0.1em", color: "#9d174d", background: "#fce7f3", padding: "4px 12px", borderRadius: "999px" }}>
-            <Sparkles size={13} style={{ color: "#be185d" }} />
+      <div className="quiz-result-view animate-screen-fade">
+        {/* Header Badge */}
+        <div className="quiz-result-header">
+          <div className="quiz-badge-pill">
+            <Sparkles size={12} className="quiz-sparkle-badge-icon" />
             <span>{result.badge}</span>
           </div>
 
-          <DialogTitle 
-            className="dialog-display"
-            style={{
-              fontFamily: "Georgia, serif",
-              fontSize: "28px",
-              fontWeight: 400,
-              color: "#411c2b",
-              lineHeight: 1.2,
-              margin: "6px 0 0"
-            }}
-          >
-            You are <em style={{ fontStyle: "italic", color: "#be185d" }}>{result.name}</em>
+          <DialogTitle className="dialog-display quiz-result-title">
+            You are <em>{result.name}</em>
           </DialogTitle>
 
-          <DialogDescription 
-            style={{
-              fontSize: "13.5px",
-              color: "#6b535d",
-              lineHeight: 1.45,
-              margin: 0
-            }}
-          >
+          <DialogDescription className="quiz-result-subtitle">
             {result.title}
           </DialogDescription>
         </div>
 
         {/* Dynamic Profile Card */}
-        <div 
-          style={{
-            background: "#ffffff",
-            border: "1.5px solid #ebd8d4",
-            borderRadius: "18px",
-            padding: "20px",
-            display: "flex",
-            flexDirection: "column",
-            gap: "12px",
-            boxShadow: "0 6px 20px rgba(65, 28, 43, 0.04)"
-          }}
-        >
-          <p style={{ fontSize: "13px", lineHeight: 1.6, color: "#4a323c", margin: 0 }}>
+        <div className="quiz-profile-card">
+          <p className="quiz-profile-desc">
             {result.desc}
           </p>
 
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
+          <div className="quiz-strengths-grid">
             {result.strengths.map((st, sIdx) => (
-              <span key={sIdx} style={{ display: "inline-flex", alignItems: "center", gap: "4px", fontSize: "10.5px", fontWeight: 700, color: "#9d174d", background: "#fff5f8", border: "1px solid #fbcfe8", padding: "3px 9px", borderRadius: "6px" }}>
-                <CheckCircle2 size={11} style={{ color: "#16a34a" }} />
+              <span key={sIdx} className="quiz-strength-chip">
+                <CheckCircle2 size={12} className="chip-check-icon" />
                 <span>{st}</span>
               </span>
             ))}
           </div>
 
           {/* Complementary Match Insight */}
-          <div 
-            style={{
-              background: "linear-gradient(135deg, #fffbf7 0%, #fef3ec 100%)",
-              border: "1px solid #ebd4cb",
-              borderRadius: "14px",
-              padding: "12px 16px",
-              marginTop: "4px"
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "4px" }}>
-              <Heart size={14} style={{ color: "#be185d" }} />
-              <strong style={{ fontSize: "12.5px", color: "#411c2b" }}>
+          <div className="quiz-complementary-card">
+            <div className="quiz-comp-header">
+              <div className="comp-heart-icon-box">
+                <Heart size={14} fill="#e11d48" color="#e11d48" />
+              </div>
+              <strong className="comp-title">
                 Your Ideal Complementary Partner: {result.idealMatch}
               </strong>
             </div>
-            <p style={{ fontSize: "12px", color: "#6b535d", lineHeight: 1.45, margin: 0 }}>
+            <p className="comp-desc">
               {result.idealMatchDesc}
             </p>
           </div>
         </div>
 
         {/* Footer Actions */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingTop: "6px", borderTop: "1px solid #ebdcd9", gap: "12px" }}>
+        <div className="quiz-modal-footer">
           <button
             type="button"
             onClick={handleReset}
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "6px",
-              background: "none",
-              border: "none",
-              fontSize: "12.5px",
-              fontWeight: 600,
-              color: "#7c656b",
-              cursor: "pointer"
-            }}
+            className="quiz-retake-btn"
           >
             <RotateCcw size={13} />
-            <span>Retake Quiz</span>
+            <span>Retake Assessment</span>
           </button>
 
           <Link
             href="/register/step-1"
             onClick={() => onClose && onClose()}
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "8px",
-              padding: "12px 24px",
-              fontSize: "13.5px",
-              fontWeight: 700,
-              borderRadius: "10px",
-              background: "#411c2b",
-              color: "#fff",
-              textDecoration: "none",
-              marginLeft: "auto",
-              boxShadow: "0 6px 18px rgba(65, 28, 43, 0.15)"
-            }}
+            className="quiz-primary-cta"
           >
             <span>Find Value-Aligned Matches</span>
-            <ArrowRight size={16} />
+            <ArrowRight size={15} />
           </Link>
         </div>
       </div>
     );
   }
 
-  // Active Question View
+  // 3. Active Question View
   return (
-    <div 
-      className="quiz-modal-container"
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: "16px",
-        color: "#411c2b",
-        fontFamily: "Arial, Helvetica, sans-serif"
-      }}
-    >
+    <div className="quiz-modal-container animate-screen-fade">
       {/* Progress Bar & Header */}
-      <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", fontSize: "11px", fontWeight: 800, letterSpacing: "0.1em", color: "#be185d", textTransform: "uppercase" }}>
-            <Sparkles size={13} style={{ color: "#be185d" }} />
+      <div className="quiz-header-block">
+        <div className="quiz-top-bar">
+          <div className="quiz-category-pill">
+            <Sparkles size={12} />
             <span>QUESTION {step + 1} OF {totalQuestions} • {currentQuestion.category}</span>
           </div>
-          <span style={{ fontSize: "11px", fontWeight: 700, color: "#7c656b" }}>
+          <span className="quiz-progress-pct">
             {Math.round(((step) / totalQuestions) * 100)}% Completed
           </span>
         </div>
 
         {/* Progress Track */}
-        <div style={{ width: "100%", height: "4px", background: "#ebdcd5", borderRadius: "999px", overflow: "hidden" }}>
+        <div className="quiz-step-progress-track">
           <div 
-            style={{
-              width: `${((step + 1) / totalQuestions) * 100}%`,
-              height: "100%",
-              background: "linear-gradient(90deg, #be185d 0%, #9d174d 100%)",
-              transition: "width 0.3s ease"
-            }}
+            className="quiz-step-progress-fill"
+            style={{ width: `${((step + 1) / totalQuestions) * 100}%` }}
           />
         </div>
 
-        <DialogTitle 
-          className="dialog-display"
-          style={{
-            fontFamily: "Georgia, serif",
-            fontSize: "24px",
-            fontWeight: 400,
-            color: "#411c2b",
-            lineHeight: 1.25,
-            margin: "4px 0 0"
-          }}
-        >
+        <DialogTitle className="dialog-display quiz-question-title">
           {currentQuestion.title}
         </DialogTitle>
-        <DialogDescription style={{ fontSize: "13px", color: "#6b535d", margin: 0 }}>
+        <DialogDescription className="quiz-question-subtitle">
           {currentQuestion.subtitle}
         </DialogDescription>
       </div>
 
       {/* 2 Interactive Tap Options */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "12px", marginTop: "4px" }}>
+      <div className="quiz-options-grid">
         {currentQuestion.options.map((opt) => {
           const OptionIcon = opt.icon;
           return (
@@ -419,35 +375,22 @@ export const QuizModal: React.FC<QuizModalProps> = ({ onClose }) => {
               key={opt.id}
               type="button"
               onClick={() => handleSelectOption(opt.id)}
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "flex-start",
-                gap: "10px",
-                background: "#ffffff",
-                border: "1.5px solid #ebd8d4",
-                borderRadius: "16px",
-                padding: "18px",
-                textAlign: "left",
-                cursor: "pointer",
-                boxShadow: "0 4px 14px rgba(65, 28, 43, 0.03)",
-                transition: "all 0.18s ease"
-              }}
+              className="quiz-option-card"
             >
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
-                <span style={{ width: "36px", height: "36px", borderRadius: "10px", background: "#fdf2f4", color: "#9d174d", display: "grid", placeItems: "center" }}>
+              <div className="quiz-option-top">
+                <span className="quiz-option-icon-box">
                   <OptionIcon size={18} />
                 </span>
-                <span style={{ fontSize: "9.5px", fontWeight: 700, color: "#9d174d", background: "#fce7f3", padding: "2.5px 8px", borderRadius: "999px" }}>
+                <span className="quiz-option-tag">
                   {opt.tag}
                 </span>
               </div>
 
-              <strong style={{ fontFamily: "Georgia, serif", fontSize: "16px", color: "#411c2b", margin: 0 }}>
+              <strong className="quiz-option-label">
                 {opt.label}
               </strong>
 
-              <p style={{ fontSize: "12px", color: "#624b54", lineHeight: 1.5, margin: 0 }}>
+              <p className="quiz-option-desc">
                 {opt.desc}
               </p>
             </button>
@@ -455,24 +398,24 @@ export const QuizModal: React.FC<QuizModalProps> = ({ onClose }) => {
         })}
       </div>
 
-      {/* Footer Cancel / Step Back */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingTop: "10px", borderTop: "1px solid #ebdcd9" }}>
+      {/* Footer Navigation */}
+      <div className="quiz-nav-footer">
         {step > 0 ? (
           <button
             type="button"
             onClick={() => setStep(step - 1)}
-            style={{ background: "none", border: "none", fontSize: "12.5px", fontWeight: 600, color: "#7c656b", cursor: "pointer" }}
+            className="quiz-back-btn"
           >
             ← Previous Question
           </button>
         ) : (
-          <span style={{ fontSize: "11.5px", color: "#9c828b" }}>2-minute quick assessment</span>
+          <span className="quiz-assessment-tag">2-minute quick assessment</span>
         )}
 
         <button
           type="button"
           onClick={() => onClose && onClose()}
-          style={{ background: "none", border: "none", fontSize: "12.5px", fontWeight: 600, color: "#7c656b", cursor: "pointer" }}
+          className="quiz-close-btn"
         >
           Close
         </button>

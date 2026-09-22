@@ -9,6 +9,19 @@ import {
   MessageCircle,
   Compass,
   Eye,
+  EyeOff,
+  Shield,
+  ShieldCheck,
+  PhoneCall,
+  Sparkles,
+  Heart,
+  CheckCircle2,
+  Lock,
+  Play,
+  Pause,
+  Volume2,
+  SlidersHorizontal,
+  Home
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 
@@ -34,6 +47,140 @@ export const BentoFeaturesSection: React.FC<BentoFeaturesSectionProps> = ({
   onOpenReasons,
 }) => {
   const [activeCity, setActiveCity] = React.useState<"london" | "dubai" | "mumbai">("dubai");
+  const [isPlayingVoice, setIsPlayingVoice] = React.useState(false);
+  const [currentTimeStr, setCurrentTimeStr] = React.useState("0:00");
+  const [photoShield, setPhotoShield] = React.useState(true);
+  const [contactShield, setContactShield] = React.useState(true);
+  const voiceAudioRef = React.useRef<HTMLAudioElement | null>(null);
+  const bgMusicRef = React.useRef<HTMLAudioElement | null>(null);
+
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      const voiceAudio = new Audio("/assets/voice-sample.mp3");
+      const bgMusic = new Audio("/assets/soothing-music.wav");
+      
+      voiceAudio.volume = 1.0;
+      bgMusic.volume = 0.22; // Gentle, soothing background volume
+      bgMusic.loop = true;
+
+      voiceAudioRef.current = voiceAudio;
+      bgMusicRef.current = bgMusic;
+
+      const handleTimeUpdate = () => {
+        if (voiceAudio.duration && !isNaN(voiceAudio.duration)) {
+          const cur = voiceAudio.currentTime;
+          const mins = Math.floor(cur / 60);
+          const secs = Math.floor(cur % 60);
+          setCurrentTimeStr(`${mins}:${secs < 10 ? "0" : ""}${secs}`);
+        }
+      };
+
+      const handleEnded = () => {
+        setIsPlayingVoice(false);
+        setCurrentTimeStr("0:00");
+        if (bgMusicRef.current) {
+          bgMusicRef.current.pause();
+          bgMusicRef.current.currentTime = 0;
+        }
+      };
+
+      voiceAudio.addEventListener("timeupdate", handleTimeUpdate);
+      voiceAudio.addEventListener("ended", handleEnded);
+
+      return () => {
+        voiceAudio.pause();
+        bgMusic.pause();
+        voiceAudio.removeEventListener("timeupdate", handleTimeUpdate);
+        voiceAudio.removeEventListener("ended", handleEnded);
+      };
+    }
+  }, []);
+
+  const handleVoiceToggle = () => {
+    const voiceAudio = voiceAudioRef.current;
+    const bgMusic = bgMusicRef.current;
+
+    if (isPlayingVoice) {
+      if (voiceAudio) {
+        voiceAudio.pause();
+        voiceAudio.currentTime = 0;
+      }
+      if (bgMusic) {
+        bgMusic.pause();
+        bgMusic.currentTime = 0;
+      }
+      if (typeof window !== "undefined" && "speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+      }
+      setIsPlayingVoice(false);
+      setCurrentTimeStr("0:00");
+    } else {
+      if (voiceAudio) {
+        voiceAudio.currentTime = 0;
+        if (bgMusic) {
+          bgMusic.currentTime = 0;
+          bgMusic.play().catch(() => {});
+        }
+        voiceAudio
+          .play()
+          .then(() => {
+            setIsPlayingVoice(true);
+          })
+          .catch(() => {
+            // SpeechSynthesis fallback with gentle natural tone
+            if (typeof window !== "undefined" && "speechSynthesis" in window) {
+              window.speechSynthesis.cancel();
+              const utterance = new SpeechSynthesisUtterance(
+                "I think the best plans leave a little room for the unexpected."
+              );
+              const voices = window.speechSynthesis.getVoices();
+              const femaleVoice = voices.find(
+                (v) =>
+                  v.name.includes("Samantha") ||
+                  v.name.includes("Victoria") ||
+                  v.name.includes("Karen") ||
+                  v.name.includes("Zira") ||
+                  v.name.includes("Neerja") ||
+                  (v.lang.startsWith("en") && v.name.toLowerCase().includes("female"))
+              );
+
+              if (femaleVoice) utterance.voice = femaleVoice;
+              utterance.rate = 0.92;
+              utterance.pitch = 1.05;
+
+              utterance.onstart = () => {
+                setIsPlayingVoice(true);
+                if (bgMusic) {
+                  bgMusic.currentTime = 0;
+                  bgMusic.play().catch(() => {});
+                }
+              };
+              utterance.onend = () => {
+                setIsPlayingVoice(false);
+                setCurrentTimeStr("0:00");
+                if (bgMusic) {
+                  bgMusic.pause();
+                  bgMusic.currentTime = 0;
+                }
+              };
+              utterance.onerror = () => {
+                setIsPlayingVoice(false);
+                setCurrentTimeStr("0:00");
+                if (bgMusic) {
+                  bgMusic.pause();
+                  bgMusic.currentTime = 0;
+                }
+              };
+
+              window.speechSynthesis.speak(utterance);
+            }
+          });
+      }
+    }
+    if (onToggleVoice) {
+      onToggleVoice();
+    }
+  };
 
   const CITY_EVENTS = {
     dubai: {
@@ -58,57 +205,51 @@ export const BentoFeaturesSection: React.FC<BentoFeaturesSectionProps> = ({
   return (
     <section className="more-ways-section" id="more-ways" aria-labelledby="more-ways-title">
       <div className="more-ways-header">
-        <h2 id="more-ways-title">
-          More ways to find
-          <br />
-          <em>your kind of connection.</em>
-        </h2>
+        <div>
+          <div className="eyebrow">06 / INTELLIGENT AI FEATURES</div>
+          <h2 id="more-ways-title">
+            More ways to find
+            <br />
+            <em>your kind of connection.</em>
+          </h2>
+        </div>
       </div>
 
       <div className="bento-grid">
         {/* Card 1: Skip the small talk (Tall Left Card) */}
         <div className="bento-card bento-icebreaker">
-          <div className="bento-eyebrow">
-            <MessageSquare size={13} />
-            <span>SKIP THE SMALL TALK</span>
-          </div>
+                <div className="bento-eyebrow">
+                  <MessageSquare size={13} />
+                  <span>SKIP THE SMALL TALK</span>
+                </div>
           <h3 className="bento-card-title">
             A better kind
             <br />
             of “hey.”
           </h3>
 
-          <div className="icebreaker-chat-area">
-            <div className="icebreaker-bubble-row">
-              <img src="/assets/arjun.png" alt="Arjun avatar" className="icebreaker-avatar" />
-              <div className="icebreaker-speech-bubble">
-                <p>{selectedIcebreaker}</p>
-              </div>
-            </div>
-
-            <div className="icebreaker-options">
-              <button
-                className={`icebreaker-btn ${selectedIcebreaker === "Your ideal Sunday?" ? "selected" : ""}`}
-                onClick={() => onSelectIcebreaker("Your ideal Sunday?")}
-              >
-                Your ideal Sunday? <ArrowUpRight size={13} />
-              </button>
-              <button
-                className={`icebreaker-btn ${selectedIcebreaker === "A place that feels like home?" ? "selected" : ""}`}
-                onClick={() => onSelectIcebreaker("A place that feels like home?")}
-              >
-                A place that feels like home? <ArrowUpRight size={13} />
-              </button>
-              <button
-                className={`icebreaker-btn ${selectedIcebreaker === "What made you smile today?" ? "selected" : ""}`}
-                onClick={() => onSelectIcebreaker("What made you smile today?")}
-              >
-                What made you smile today? <ArrowUpRight size={13} />
-              </button>
-            </div>
+          <div className="icebreaker-preview">
+            <img src="/assets/arjun.png" alt="Arjun avatar" className="icebreaker-avatar" />
+            <div className="chat-bubble-sample">{selectedIcebreaker}</div>
           </div>
 
-          <span className="bento-footnote">Sample icebreakers · Try one</span>
+          <div className="icebreaker-pills">
+            {["Your ideal Sunday?", "A place that feels like home?", "What made you smile today?"].map(
+              (prompt) => (
+                <button
+                  key={prompt}
+                  type="button"
+                  className={`icebreaker-pill ${selectedIcebreaker === prompt ? "active" : ""}`}
+                  onClick={() => onSelectIcebreaker(prompt)}
+                >
+                  <span>{prompt}</span>
+                  <ArrowUpRight size={13} />
+                </button>
+              )
+            )}
+          </div>
+
+          <span className="bento-footnote">✦ Tap any prompt to preview</span>
         </div>
 
         {/* Right Bento Column */}
@@ -284,8 +425,11 @@ export const BentoFeaturesSection: React.FC<BentoFeaturesSectionProps> = ({
           <div className="bento-middle-row">
             {/* Card 3: Voice behind the words */}
             <div
-              className="bento-card bento-voice"
-              onClick={onToggleVoice}
+              className={`bento-card bento-voice ${isPlayingVoice ? "is-playing" : ""}`}
+              onClick={handleVoiceToggle}
+              role="button"
+              tabIndex={0}
+              aria-label={isPlayingVoice ? "Pause voice note" : "Play voice note"}
             >
               <div className="bento-eyebrow">
                 <Headphones size={13} />
@@ -293,10 +437,22 @@ export const BentoFeaturesSection: React.FC<BentoFeaturesSectionProps> = ({
               </div>
 
               <div className="voice-player-row">
-                <div className={`voice-play-icon ${voicePlaying ? "playing" : ""}`}>
-                  <MessageCircle size={16} />
-                </div>
-                <div className={`waveform-bars ${voicePlaying ? "animated" : ""}`}>
+                <button
+                  type="button"
+                  className={`voice-play-icon ${isPlayingVoice ? "playing" : ""}`}
+                  aria-label={isPlayingVoice ? "Pause voice note" : "Play voice note"}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleVoiceToggle();
+                  }}
+                >
+                  {isPlayingVoice ? (
+                    <Pause size={14} />
+                  ) : (
+                    <Play size={14} style={{ marginLeft: "2px" }} />
+                  )}
+                </button>
+                <div className={`waveform-bars ${isPlayingVoice ? "animated" : ""}`}>
                   <span style={{ height: "40%" }} />
                   <span style={{ height: "70%" }} />
                   <span style={{ height: "100%" }} />
@@ -315,7 +471,9 @@ export const BentoFeaturesSection: React.FC<BentoFeaturesSectionProps> = ({
                   <span style={{ height: "35%" }} />
                   <span style={{ height: "65%" }} />
                 </div>
-                <span className="voice-duration">0:12</span>
+                <span className="voice-duration">
+                  {isPlayingVoice ? currentTimeStr : "0:12"}
+                </span>
               </div>
 
               <p className="voice-quote">
@@ -351,31 +509,221 @@ export const BentoFeaturesSection: React.FC<BentoFeaturesSectionProps> = ({
               </button>
             </div>
           </div>
+        </div>
 
-          {/* Card 5: Your pace. Your space. (Bottom Control Card) */}
-          <div className="bento-card bento-control">
+        {/* Card 5: Your pace. Your space. (Bottom Control Card - Spans Full Width) */}
+        <div className="bento-card bento-control">
+          <div className="control-card-header">
             <div className="bento-eyebrow">
-              <Eye size={13} />
+              <Shield size={13} />
               <span>YOUR PACE. YOUR SPACE.</span>
             </div>
-            <h3 className="bento-card-title">A little more control.</h3>
+            <div className={`control-status-pill ${profileHidden ? "private" : "discoverable"}`}>
+              <span>{profileHidden ? "Incognito Shield Active" : "Public Discovery Active"}</span>
+            </div>
+          </div>
 
-            <div className="control-toggle-row">
-              <div className="control-label-group">
-                <span className="control-main-label">Profile discovery</span>
-                <span className="control-sub-label">
-                  {profileHidden ? "Hidden until you are ready" : "Visible to mutual matches"}
-                </span>
+          <div className="control-stage-grid">
+            {/* Left Column: Toggles Stack */}
+            <div className="control-toggles-col">
+              <h3 className="bento-card-title control-title">
+                A little more control over your presence.
+              </h3>
+              <p className="control-intro-desc">
+                Browse silently at your own comfort. Control who sees your photos, contact details, and activity.
+              </p>
+
+              <div className="control-toggles-stack">
+                {/* Toggle 1: Ghost Mode (Discovery) */}
+                <div
+                  className={`control-toggle-card ${profileHidden ? "active-private" : ""}`}
+                  onClick={(e) => {
+                    if ((e.target as HTMLElement).closest('button[role="switch"]')) return;
+                    onToggleProfileHidden(!profileHidden);
+                  }}
+                >
+                  <div className="control-toggle-left">
+                    <div className="toggle-icon-wrap">
+                      {profileHidden ? <EyeOff size={15} /> : <Eye size={15} />}
+                    </div>
+                    <div className="control-label-group">
+                      <span className="control-main-label">Ghost Mode (Stealth Discovery)</span>
+                      <span className="control-sub-label">
+                        {profileHidden
+                          ? "Invisible in search · Only profiles you like can view you"
+                          : "Discoverable to verified community members"}
+                      </span>
+                    </div>
+                  </div>
+                  <Switch
+                    checked={profileHidden}
+                    onCheckedChange={(checked) => onToggleProfileHidden(checked)}
+                    aria-label="Toggle ghost mode"
+                  />
+                </div>
+
+                {/* Toggle 2: Photo Guard */}
+                <div
+                  className={`control-toggle-card ${photoShield ? "active-private" : ""}`}
+                  onClick={(e) => {
+                    if ((e.target as HTMLElement).closest('button[role="switch"]')) return;
+                    setPhotoShield(!photoShield);
+                  }}
+                >
+                  <div className="control-toggle-left">
+                    <div className="toggle-icon-wrap">
+                      <Lock size={15} />
+                    </div>
+                    <div className="control-label-group">
+                      <span className="control-main-label">Photo Privacy Shield</span>
+                      <span className="control-sub-label">
+                        {photoShield
+                          ? "Photos softly protected until mutual match interest"
+                          : "Photos visible to all verified community members"}
+                      </span>
+                    </div>
+                  </div>
+                  <Switch
+                    checked={photoShield}
+                    onCheckedChange={(checked) => setPhotoShield(checked)}
+                    aria-label="Toggle photo shield"
+                  />
+                </div>
+
+                {/* Toggle 3: Contact Lock */}
+                <div
+                  className={`control-toggle-card ${contactShield ? "active-private" : ""}`}
+                  onClick={(e) => {
+                    if ((e.target as HTMLElement).closest('button[role="switch"]')) return;
+                    setContactShield(!contactShield);
+                  }}
+                >
+                  <div className="control-toggle-left">
+                    <div className="toggle-icon-wrap">
+                      <PhoneCall size={15} />
+                    </div>
+                    <div className="control-label-group">
+                      <span className="control-main-label">Direct Contact Guard</span>
+                      <span className="control-sub-label">
+                        {contactShield
+                          ? "Phone & WhatsApp locked until personal mutual consent"
+                          : "Phone contact visible to accepted matches"}
+                      </span>
+                    </div>
+                  </div>
+                  <Switch
+                    checked={contactShield}
+                    onCheckedChange={(checked) => setContactShield(checked)}
+                    aria-label="Toggle contact guard"
+                  />
+                </div>
               </div>
-              <Switch
-                checked={!profileHidden}
-                onCheckedChange={(checked) => onToggleProfileHidden(!checked)}
-                aria-label="Toggle profile discovery"
-              />
             </div>
 
-            <span className="bento-footnote">Control preview · No live profile is affected.</span>
+            {/* Right Column: Front-Facing Mobile Phone Mockup */}
+            <div className="control-phone-wrapper">
+              <div className="privacy-phone-chassis">
+                {/* Phone Bezel & Outer Shell */}
+                <div className="privacy-phone-inner">
+                  {/* Top Status Bar with Dynamic Island */}
+                  <div className="privacy-phone-status-row">
+                    <span className="phone-clock">3:28</span>
+                    <div className="privacy-phone-island">
+                      <div className="island-lens" />
+                      <div className="island-sensor" />
+                    </div>
+                    <div className="phone-status-dots">
+                      <span>•••</span>
+                    </div>
+                  </div>
+
+                  {/* Sub-header Filter Line */}
+                  <div className="phone-sub-nav">
+                    <span className="sub-nav-text">For a little more</span>
+                    <SlidersHorizontal size={13} className="sub-nav-icon" />
+                  </div>
+
+                  {/* In-App Mobile Screen */}
+                  <div className="privacy-screen-body">
+                    {/* User Profile Header */}
+                    <div className="phone-maya-header">
+                      <div className="maya-avatar-wrap">
+                        <img
+                          src="/assets/mira.png"
+                          alt="Maya"
+                          className={`maya-avatar-img ${photoShield ? "photo-shielded" : ""}`}
+                        />
+                        {photoShield && (
+                          <div className="maya-shield-icon-badge" title="Photo Guard Active">
+                            <Lock size={11} />
+                          </div>
+                        )}
+                        {profileHidden && !photoShield && (
+                          <div className="maya-ghost-badge" title="Ghost Mode Active">
+                            <EyeOff size={11} />
+                          </div>
+                        )}
+                      </div>
+                      <div className="maya-name-box">
+                        <h4 className="maya-name">
+                          Maya, 29
+                          {profileHidden && <span className="maya-private-tag">🔒 Private</span>}
+                        </h4>
+                        <div className="maya-role-contact-line">
+                          <span className="maya-role">Architect · Dubai</span>
+                          {contactShield ? (
+                            <span className="maya-contact-pill locked" title="Direct Contact Locked">
+                              <Lock size={8} /> Locked
+                            </span>
+                          ) : (
+                            <span className="maya-contact-pill shared" title="Direct Contact Shared">
+                              <PhoneCall size={8} /> 📞 Shared
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Section Heading */}
+                    <div className="maya-about-section">
+                      <span className="maya-eyebrow">A LITTLE ABOUT ME</span>
+                      <h3 className="maya-headline">
+                        Big dreams.
+                        <br />
+                        Small joys.
+                        <br />
+                        <em>Room for two.</em>
+                      </h3>
+                      <p className="maya-bio">
+                        I design spaces for a living. My favorite place? A table full of people I love.
+                      </p>
+
+                      {/* Interest Chips */}
+                      <div className="maya-chips-row">
+                        <span className="maya-chip">Architecture</span>
+                        <span className="maya-chip">Long walks</span>
+                        <span className="maya-chip">Sunday cooking</span>
+                      </div>
+
+                      {/* Bottom Feature Card */}
+                      <div className="maya-life-card">
+                        <div className="life-card-top">
+                          <Home size={12} className="life-card-icon" />
+                          <strong>A life I&apos;d love</strong>
+                        </div>
+                        <p>A home in Dubai, close to family.</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Phone Bottom Home Bar */}
+                  <div className="phone-home-indicator-bar" />
+                </div>
+              </div>
+            </div>
           </div>
+
+          <span className="bento-footnote">✦ Interactive Privacy Simulator · Test your security settings on mobile in real-time</span>
         </div>
       </div>
     </section>

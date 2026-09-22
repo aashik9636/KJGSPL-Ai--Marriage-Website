@@ -32,7 +32,9 @@ export const Footer: React.FC<FooterProps> = ({
           <h2>
             Ready for something
             <br />
-            <em>beyond the spark?</em>
+            <Link href="/beyond-the-spark" scroll={true} style={{ color: "inherit", textDecoration: "none", cursor: "pointer" }}>
+              <em>beyond the spark?</em>
+            </Link>
           </h2>
           <p>
             Meet the people who share your direction, your lifestyle, and your kind of tomorrow.
@@ -44,12 +46,14 @@ export const Footer: React.FC<FooterProps> = ({
             >
               Find your kind of connection <ArrowUpRight size={18} />
             </Link>
-            <button
+            <Link
+              href="/beyond-the-spark"
+              scroll={true}
               className="text-button light"
-              onClick={onOpenMatchmaking || onOpenPrivacy}
+              style={{ textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "6px" }}
             >
-              How our matchmaking works
-            </button>
+              Discover the philosophy <ArrowUpRight size={14} />
+            </Link>
           </div>
         </div>
       </section>
@@ -86,11 +90,11 @@ export const Footer: React.FC<FooterProps> = ({
             </div>
             <ul>
               <li><a href="#">Home</a></li>
-              <li><a href="#story">The Philosophy</a></li>
-              <li><a href="#experience">The Experience</a></li>
-              <li><a href="#preview">Product Preview</a></li>
-              <li><a href="#moments">Moments in Between</a></li>
-              <li><a href="#membership">Membership Plans</a></li>
+              <li><a href="#story">Philosophy</a></li>
+              <li><a href="#experience">Experience</a></li>
+              <li><a href="#preview">Preview</a></li>
+              <li><a href="#moments">Moments</a></li>
+              <li><a href="#membership">Pricing</a></li>
             </ul>
           </div>
 

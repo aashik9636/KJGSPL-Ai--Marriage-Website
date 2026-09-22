@@ -185,7 +185,7 @@ export default function Home() {
         }}
       >
         <DialogContent
-          className={`site-dialog ${modal === "details" ? "details-dialog" : ""} ${modal === "matchmaking" || modal === "reasons" || modal === "quiz" ? "matchmaking-dialog" : ""}`}
+          className={`site-dialog ${modal === "details" ? "details-dialog" : ""} ${modal === "matchmaking" || modal === "reasons" || modal === "quiz" || modal === "journey" ? "matchmaking-dialog" : ""}`}
         >
           {modal === "quiz" && (
             <QuizModal

@@ -19,12 +19,12 @@ export const Header: React.FC<HeaderProps> = ({ onOpenJourney }) => {
         </span>
       </Link>
       <nav aria-label="Main navigation">
-        <a href="#story">The philosophy</a>
-        <a href="#experience">The experience</a>
-        <a href="#preview">The preview</a>
+        <a href="#story">Philosophy</a>
+        <a href="#experience">Experience</a>
+        <a href="#preview">Preview</a>
         <a href="#moments">Moments</a>
         <a href="#more-ways">Possibilities</a>
-        <a href="#membership">Membership</a>
+        <a href="#membership">Pricing</a>
         <Link href="/register/step-1" className="header-register-nav">Register</Link>
       </nav>
       <Link
@@ -37,4 +37,3 @@ export const Header: React.FC<HeaderProps> = ({ onOpenJourney }) => {
     </header>
   );
 };
-

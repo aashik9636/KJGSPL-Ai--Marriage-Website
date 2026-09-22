@@ -42,7 +42,7 @@ export const ExperienceSection: React.FC<ExperienceSectionProps> = ({
     >
       <div className="section-top">
         <div>
-          <div className="eyebrow">01 / GO BEYOND THE PROFILE</div>
+          <div className="eyebrow">02 / GO BEYOND THE PROFILE</div>
           <h2 id="experience-title">
             Same spark.
             <br />

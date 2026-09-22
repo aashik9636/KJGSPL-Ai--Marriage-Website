@@ -40,6 +40,19 @@ export const ShowcaseSection: React.FC<ShowcaseSectionProps> = ({
       id="preview"
       aria-labelledby="showcase-title"
     >
+      {/* Section Header */}
+      <div className="showcase-header">
+        <div className="eyebrow">03 / INTERACTIVE APP PREVIEW</div>
+        <h2>
+          Designed with intention.
+          <br />
+          <em>Built for meaningful connection.</em>
+        </h2>
+        <p>
+          Experience how our intuitive interface turns values, shared timelines, and mutual curiosity into genuine lifelong conversations.
+        </p>
+      </div>
+
       {/* Step Navigation Tabs */}
       <div className="showcase-tabs-container">
         <div className="showcase-tabs" role="tablist" aria-label="Product preview steps">
@@ -276,13 +289,6 @@ export const ShowcaseSection: React.FC<ShowcaseSectionProps> = ({
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Bottom Heading & Subtitle */}
-      <div className="showcase-bottom-caption">
-        <h2 id="showcase-title">Start with something <em>real</em></h2>
-        <p>Turn a thoughtful question into a conversation that feels like you.</p>
-        <span className="showcase-footnote">Product preview · Fictional people and conversations.</span>
       </div>
     </section>
   );

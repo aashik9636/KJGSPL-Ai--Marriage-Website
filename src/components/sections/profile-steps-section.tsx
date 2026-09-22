@@ -16,7 +16,9 @@ import {
   Volume2,
   VolumeX,
   RotateCcw,
-  ChevronDown
+  ChevronDown,
+  Send,
+  MessageCircle
 } from "lucide-react";
 
 interface ProfileStepsSectionProps {
@@ -94,7 +96,10 @@ export const ProfileStepsSection: React.FC<ProfileStepsSectionProps> = ({ onOpen
   const [expandedStep, setExpandedStep] = useState<number | null>(null);
   const [isAudioMuted, setIsAudioMuted] = useState(true);
   const [isVideoEnded, setIsVideoEnded] = useState(false);
-  const [currentTime, setCurrentTime] = useState<string>("9:41");
+  const [currentTime, setCurrentTime] = useState<string>("12:34");
+  const [matchingPhase, setMatchingPhase] = useState<"scanning" | "matched">("scanning");
+  const [scanScore, setScanScore] = useState<number>(0);
+  const [scanText, setScanText] = useState<string>("Scanning 340+ compatibility dimensions...");
   const videoRef = React.useRef<HTMLVideoElement | null>(null);
 
   React.useEffect(() => {
@@ -134,20 +139,63 @@ export const ProfileStepsSection: React.FC<ProfileStepsSectionProps> = ({ onOpen
     }
   };
 
+  const startMatchingScan = React.useCallback(() => {
+    setMatchingPhase("scanning");
+    setScanScore(0);
+    setScanText("Scanning 340+ compatibility dimensions...");
+
+    const startTime = performance.now();
+    const duration = 2000;
+
+    let animFrame: number;
+    const animate = (time: number) => {
+      const elapsed = time - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const currentVal = Math.round(eased * 94);
+      setScanScore(currentVal);
+
+      if (currentVal < 28) {
+        setScanText("Analyzing emotional depth & communication...");
+      } else if (currentVal < 60) {
+        setScanText("Evaluating life vision, timeline & priorities...");
+      } else if (currentVal < 88) {
+        setScanText("Synthesizing daily rhythms & lifestyle harmony...");
+      } else {
+        setScanText("High Compatibility Match Confirmed: 94% ✨");
+      }
+
+      if (progress < 1) {
+        animFrame = requestAnimationFrame(animate);
+      } else {
+        setTimeout(() => {
+          setMatchingPhase("matched");
+        }, 400);
+      }
+    };
+
+    animFrame = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(animFrame);
+  }, []);
+
   React.useEffect(() => {
     if (activeStep === 1 && videoRef.current) {
       videoRef.current.currentTime = 0;
       videoRef.current.play().catch(() => {});
       setIsVideoEnded(false);
     }
-  }, [activeStep]);
+    if (activeStep === 3) {
+      const cleanup = startMatchingScan();
+      return cleanup;
+    }
+  }, [activeStep, startMatchingScan]);
 
   return (
     <section className="profile-steps-section" id="how-it-works">
       <div className="profile-steps-container">
         {/* Section Header */}
         <div className="profile-steps-header">
-          <span className="eyebrow">✦ STEP-BY-STEP ONBOARDING</span>
+          <div className="eyebrow">04 / STEP-BY-STEP ONBOARDING</div>
           <h2>
             A thoughtful journey from
             <br />
@@ -387,93 +435,258 @@ export const ProfileStepsSection: React.FC<ProfileStepsSectionProps> = ({ onOpen
                   {/* STEP 4 SCREEN: AI Compatibility Matrix */}
                   {activeStep === 3 && (
                     <div className="screen-step screen-step-4 animate-screen-fade">
-                      <div className="matrix-match-header">
-                        <div className="matrix-pair-avatars">
-                          <div className="avatar-chip-img-box">
-                            <img src="/assets/mira.png" alt="Mira" className="avatar-match-img" />
+                      {matchingPhase === "scanning" ? (
+                        <div className="scanner-main-card animate-screen-fade">
+                          <div className="scanner-badge-pill">
+                            <span className="scanner-live-dot" />
+                            <Sparkles size={11} className="scanner-sparkle-icon" />
+                            <span>AI NEURAL COMPATIBILITY SCAN</span>
                           </div>
-                          <span className="pair-heart"><Heart size={14} fill="#e0a3b0" color="#e0a3b0" /></span>
-                          <div className="avatar-chip-img-box">
-                            <img src="/assets/arjun.png" alt="Arjun" className="avatar-match-img" />
+
+                          {/* Mira & Arjun Avatars with Pulsing Energy Stage */}
+                          <div className="scanner-match-stage">
+                            <div className="scanner-avatar-col">
+                              <div className="scanner-avatar-ring">
+                                <div className="scanner-pulse-wave wave-1" />
+                                <div className="scanner-pulse-wave wave-2" />
+                                <div className="scanner-avatar-circle">
+                                  <img src="/assets/mira.png" alt="Mira Desai" className="scanner-avatar-img" />
+                                </div>
+                              </div>
+                              <span className="scanner-avatar-label">Mira Desai</span>
+                              <span className="scanner-avatar-sub">Creative Lead</span>
+                            </div>
+
+                            <div className="scanner-bridge-col">
+                              <div className="scanner-bridge-line" />
+                              <div className="scanner-bridge-glow" />
+                              <div className="scanner-bridge-heart">
+                                <Heart size={15} fill="#e11d48" color="#e11d48" className="scanner-beating-heart" />
+                              </div>
+                            </div>
+
+                            <div className="scanner-avatar-col">
+                              <div className="scanner-avatar-ring">
+                                <div className="scanner-pulse-wave wave-1" />
+                                <div className="scanner-pulse-wave wave-2" />
+                                <div className="scanner-avatar-circle">
+                                  <img src="/assets/arjun.png" alt="Arjun Kapoor" className="scanner-avatar-img" />
+                                </div>
+                              </div>
+                              <span className="scanner-avatar-label">Arjun Kapoor</span>
+                              <span className="scanner-avatar-sub">Architect</span>
+                            </div>
+                          </div>
+
+                          {/* Compatibility Live Counter Card */}
+                          <div className="scanner-score-box">
+                            <div className="scanner-score-head">
+                              <span className="scanner-score-title">SYNTHESIZING COMPATIBILITY</span>
+                              <span className="scanner-live-score">{scanScore}%</span>
+                            </div>
+                            <div className="scanner-meter-track">
+                              <div
+                                className="scanner-meter-fill"
+                                style={{ width: `${(scanScore / 94) * 100}%` }}
+                              />
+                            </div>
+                            <div className="scanner-live-status-row">
+                              <span className="scanner-status-spinner" />
+                              <p className="scanner-live-status">{scanText}</p>
+                            </div>
+                          </div>
+
+                          {/* Dimension Chips Preview */}
+                          <div className="scanner-chips-preview">
+                            <div className={`scanner-chip-item ${scanScore >= 28 ? "active" : ""}`}>
+                              <span className="chip-bullet">{scanScore >= 28 ? "✓" : "◌"}</span>
+                              <span>Emotional Depth</span>
+                            </div>
+                            <div className={`scanner-chip-item ${scanScore >= 60 ? "active" : ""}`}>
+                              <span className="chip-bullet">{scanScore >= 60 ? "✓" : "◌"}</span>
+                              <span>Life Vision</span>
+                            </div>
+                            <div className={`scanner-chip-item ${scanScore >= 88 ? "active" : ""}`}>
+                              <span className="chip-bullet">{scanScore >= 88 ? "✓" : "◌"}</span>
+                              <span>Core Values</span>
+                            </div>
                           </div>
                         </div>
-                        <div className="match-score-badge">
-                          <span className="score-num">94%</span>
-                          <span className="score-sub">Compatibility</span>
-                        </div>
-                      </div>
-
-                      <div className="matrix-breakdown-card">
-                        <span className="screen-section-label">AI DIMENSION ALIGNMENT</span>
-                        
-                        <div className="matrix-bar-item">
-                          <div className="matrix-bar-top">
-                            <span>Emotional &amp; Communication</span>
-                            <strong>96%</strong>
+                      ) : (
+                        <>
+                          <div className="matrix-match-header animate-screen-fade">
+                            <div className="matrix-pair-avatars">
+                              <div className="avatar-chip-img-box avatar-left">
+                                <img src="/assets/mira.png" alt="Mira" className="avatar-match-img" />
+                              </div>
+                              <div className="avatar-chip-img-box avatar-right">
+                                <img src="/assets/arjun.png" alt="Arjun" className="avatar-match-img" />
+                              </div>
+                            </div>
+                            <div className="match-score-badge">
+                              <div className="score-badge-inner">
+                                <span className="score-num">94%</span>
+                                <span className="score-sub">COMPATIBILITY</span>
+                              </div>
+                              <button
+                                type="button"
+                                className="matrix-rescan-btn"
+                                onClick={startMatchingScan}
+                                title="Re-run AI Analysis"
+                                aria-label="Re-run AI Analysis"
+                              >
+                                <RotateCcw size={10} color="#b45309" />
+                                <span className="replay-btn-text">Replay</span>
+                              </button>
+                            </div>
                           </div>
-                          <div className="matrix-track"><div className="matrix-fill w-96" /></div>
-                        </div>
 
-                        <div className="matrix-bar-item">
-                          <div className="matrix-bar-top">
-                            <span>Life Vision &amp; Timeline</span>
-                            <strong>94%</strong>
+                          <div className="matrix-breakdown-card animate-screen-fade">
+                            <span className="screen-section-label">AI DIMENSION ALIGNMENT</span>
+                            
+                            <div className="matrix-floating-heart">
+                              <Heart size={14} fill="#e0a3b0" color="#e0a3b0" />
+                            </div>
+
+                            <div className="matrix-bar-item">
+                              <div className="matrix-bar-top">
+                                <span>Emotional &amp; Communic...</span>
+                                <strong>96%</strong>
+                              </div>
+                              <div className="matrix-track">
+                                <div className="matrix-fill" style={{ width: "96%" }} />
+                              </div>
+                            </div>
+
+                            <div className="matrix-bar-item">
+                              <div className="matrix-bar-top">
+                                <span>Life Vision &amp; Timeline</span>
+                                <strong>94%</strong>
+                              </div>
+                              <div className="matrix-track">
+                                <div className="matrix-fill" style={{ width: "94%" }} />
+                              </div>
+                            </div>
+
+                            <div className="matrix-bar-item">
+                              <div className="matrix-bar-top">
+                                <span>Lifestyle Habits &amp; Routines</span>
+                                <strong>91%</strong>
+                              </div>
+                              <div className="matrix-track">
+                                <div className="matrix-fill" style={{ width: "91%" }} />
+                              </div>
+                            </div>
                           </div>
-                          <div className="matrix-track"><div className="matrix-fill w-94" /></div>
-                        </div>
 
-                        <div className="matrix-bar-item">
-                          <div className="matrix-bar-top">
-                            <span>Lifestyle Habits &amp; Routines</span>
-                            <strong>91%</strong>
+                          <div className="ai-insight-box animate-screen-fade">
+                            <Sparkles size={16} className="sparkle-icon" />
+                            <p>&ldquo;Both share a grounded, creative life vision and values around mutual respect &amp; growth.&rdquo;</p>
                           </div>
-                          <div className="matrix-track"><div className="matrix-fill w-91" /></div>
-                        </div>
-                      </div>
 
-                      <div className="ai-insight-box">
-                        <Sparkles size={14} className="sparkle-icon" />
-                        <p>&ldquo;Both share a grounded, creative life vision and values around mutual respect &amp; growth.&rdquo;</p>
-                      </div>
-
-                      <button className="screen-cta-button" onClick={() => setActiveStep(4)}>
-                        Proceed to Connection →
-                      </button>
+                          <button className="screen-cta-button animate-screen-fade" onClick={() => setActiveStep(4)}>
+                            Proceed to Connection →
+                          </button>
+                        </>
+                      )}
                     </div>
                   )}
 
-                  {/* STEP 5 SCREEN: Mutual Connection */}
+                  {/* STEP 5 SCREEN: Mutual Connection & Interactive Chat */}
                   {activeStep === 4 && (
                     <div className="screen-step screen-step-5 animate-screen-fade">
-                      <div className="connect-card-top">
-                        <div className="secure-lock-pill">
-                          <Lock size={13} />
-                          <span>MUTUAL CONSENT UNLOCKED</span>
+                      {/* Partner Chat Header */}
+                      <div className="chat-box-header">
+                        <div className="chat-header-user">
+                          <div className="chat-avatar-wrapper">
+                            <img src="/assets/arjun.png" alt="Arjun" className="chat-avatar-img" />
+                            <span className="chat-online-dot" />
+                          </div>
+                          <div className="chat-header-info">
+                            <div className="chat-header-name-row">
+                              <h5>Arjun</h5>
+                              <span className="chat-verified-badge">✓ 94% Match</span>
+                            </div>
+                            <p className="chat-header-status">Active now · Online</p>
+                          </div>
                         </div>
-                        <h4>Connection Established</h4>
-                        <p>Both Mira &amp; Arjun expressed curiosity</p>
-                      </div>
-
-                      <div className="icebreaker-card">
-                        <div className="icebreaker-label">
-                          <Sparkles size={13} /> AI CONVERSATION STARTER
-                        </div>
-                        <p className="icebreaker-text">
-                          &ldquo;You both share a passion for creative design &amp; calm weekends. Ask Arjun about his favorite architecture spots in Dubai!&rdquo;
-                        </p>
-                      </div>
-
-                      <div className="privacy-safety-pills">
-                        <div className="safety-pill">
-                          <ShieldCheck size={14} /> End-to-end private
-                        </div>
-                        <div className="safety-pill">
-                          <Compass size={14} /> Mutual respect verified
+                        <div className="chat-header-lock">
+                          <ShieldCheck size={11} color="#047857" />
+                          <span>Private</span>
                         </div>
                       </div>
 
-                      <button className="screen-cta-button" onClick={onOpenJourney}>
-                        Start Safe Conversation ✨
+                      {/* Date Divider */}
+                      <div className="chat-date-pill">
+                        <span>Today</span>
+                      </div>
+
+                      {/* Simulated Chat Thread */}
+                      <div className="chat-box-thread">
+                        {/* Arjun Left Bubble */}
+                        <div className="chat-msg chat-msg-left">
+                          <div className="msg-bubble-content left-bubble">
+                            <p>Hey Mira! Loved reading through your profile.</p>
+                            <span className="msg-time">10:40 AM</span>
+                          </div>
+                        </div>
+
+                        {/* Mira Right Bubble */}
+                        <div className="chat-msg chat-msg-right">
+                          <div className="msg-bubble-content right-bubble">
+                            <p>Hey Arjun! Thanks, your architecture work in Dubai looks amazing.</p>
+                            <span className="msg-time">10:42 AM · Read ✓✓</span>
+                          </div>
+                        </div>
+
+                        {/* Arjun Left Bubble */}
+                        <div className="chat-msg chat-msg-left">
+                          <div className="msg-bubble-content left-bubble">
+                            <p>Coffee, a quiet bookshop, and no alarms on Sundays?</p>
+                            <span className="msg-time">10:43 AM</span>
+                          </div>
+                        </div>
+
+                        {/* Mira Right Bubble */}
+                        <div className="chat-msg chat-msg-right">
+                          <div className="msg-bubble-content right-bubble">
+                            <p>I’m in! But I’ll probably have a bookshop picked out already 📚</p>
+                            <span className="msg-time">10:44 AM · Read ✓✓</span>
+                          </div>
+                        </div>
+
+                        {/* Arjun Left Bubble */}
+                        <div className="chat-msg chat-msg-left">
+                          <div className="msg-bubble-content left-bubble">
+                            <p>You plan. I’ll find the coffee. ☕✨</p>
+                            <span className="msg-time">10:45 AM</span>
+                          </div>
+                        </div>
+
+                        {/* Arjun Typing Indicator (Classic 3 dots) */}
+                        <div className="chat-msg chat-msg-left animate-screen-fade">
+                          <div className="msg-bubble-content left-bubble typing-bubble">
+                            <span className="typing-dots">
+                              <span className="typing-dot" />
+                              <span className="typing-dot" />
+                              <span className="typing-dot" />
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Simulated Chat Input Bar */}
+                      <div className="chat-box-input-row" onClick={onOpenJourney}>
+                        <span className="chat-mock-placeholder">Type a thoughtful reply…</span>
+                        <button type="button" className="chat-send-btn" aria-label="Send message">
+                          <Send size={11} color="#ffffff" />
+                        </button>
+                      </div>
+
+                      {/* Direct CTA */}
+                      <button className="screen-cta-button chat-connect-cta" onClick={onOpenJourney}>
+                        <MessageCircle size={13} className="btn-chat-icon" />
+                        <span>Start Safe Conversation</span>
                       </button>
                     </div>
                   )}

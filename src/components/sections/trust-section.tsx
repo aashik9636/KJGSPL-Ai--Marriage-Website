@@ -1,9 +1,8 @@
-"use client";
-import React from "react";
+import Link from "next/link";
 import { Heart, Check, ArrowUpRight } from "lucide-react";
 
 interface TrustSectionProps {
-  onOpenJourney: () => void;
+  onOpenJourney?: () => void;
 }
 
 export const TrustSection: React.FC<TrustSectionProps> = ({
@@ -11,6 +10,7 @@ export const TrustSection: React.FC<TrustSectionProps> = ({
 }) => {
   return (
     <section className="trust">
+      <div className="eyebrow">09 / TRUST & PRIVACY BOUNDARIES</div>
       <div className="trust-icon">
         <Heart size={31} strokeWidth={1.2} />
       </div>
@@ -34,12 +34,14 @@ export const TrustSection: React.FC<TrustSectionProps> = ({
           <Check size={16} /> No beauty scores. Ever.
         </span>
       </div>
-      <button
+      <Link
+        href="/beyond-the-spark"
+        scroll={true}
         className="button button-dark"
-        onClick={onOpenJourney}
+        style={{ textDecoration: "none" }}
       >
         Beyond the spark <ArrowUpRight size={18} />
-      </button>
+      </Link>
     </section>
   );
 };

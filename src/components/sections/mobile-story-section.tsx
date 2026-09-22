@@ -18,7 +18,7 @@ export const MobileStorySection: React.FC<MobileStorySectionProps> = ({
   return (
     <section className="mobile-story">
       <div className="mobile-story-copy">
-        <span className="eyebrow">04 / MAKE SPACE FOR SOMETHING REAL</span>
+        <div className="eyebrow">07 / AUTHENTIC INTRODUCTIONS</div>
         <h2>
           Fewer profiles.
           <br />

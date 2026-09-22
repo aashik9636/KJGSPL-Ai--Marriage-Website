@@ -1,10 +1,11 @@
 "use client";
 import React from "react";
+import Link from "next/link";
 import { Check, ArrowUpRight } from "lucide-react";
 import { plans } from "@/data/plans.data";
 
 interface MembershipSectionProps {
-  onOpenJourney: () => void;
+  onOpenJourney?: () => void;
 }
 
 export const MembershipSection: React.FC<MembershipSectionProps> = ({
@@ -14,7 +15,7 @@ export const MembershipSection: React.FC<MembershipSectionProps> = ({
     <section className="membership" id="membership">
       <div className="section-top">
         <div>
-          <span className="eyebrow">03 / YOUR PACE. YOUR CHOICE.</span>
+          <div className="eyebrow">08 / PRICING &amp; PLANS</div>
           <h2>
             Room to <em>grow closer.</em>
           </h2>
@@ -54,17 +55,17 @@ export const MembershipSection: React.FC<MembershipSectionProps> = ({
                 </li>
               ))}
             </ul>
-            <button
+            <Link
+              href="/register/step-1"
               className={
                 i === 1
                   ? "plan-btn plan-btn-featured"
                   : "plan-btn plan-btn-outline"
               }
-              onClick={onOpenJourney}
             >
               Explore {p.name}
               <ArrowUpRight size={16} />
-            </button>
+            </Link>
           </article>
         ))}
       </div>
