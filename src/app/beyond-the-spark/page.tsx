@@ -893,7 +893,6 @@ export default function BeyondTheSparkPage() {
                 disablePictureInPicture
                 disableRemotePlayback
                 controlsList="nodownload noplaybackrate nofullscreen noremoteplayback"
-                poster="/assets/wedding-card-bg.png"
               >
                 <source
                   src={HERO_VIDEOS.find((v) => v.id === activeHeroVideo)?.src || "/assets/heroPart.mp4"}
