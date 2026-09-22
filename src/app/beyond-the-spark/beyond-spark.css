@@ -497,15 +497,21 @@
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  gap: 120px;
+  gap: 220px;
   flex-wrap: wrap;
   margin-top: 15px;
   position: relative;
 }
 
+@media (max-width: 1200px) {
+  .bts-phone-matrix-showcase {
+    gap: 130px;
+  }
+}
+
 @media (max-width: 992px) {
   .bts-phone-matrix-showcase {
-    gap: 60px;
+    gap: 70px;
   }
 }
 
@@ -520,13 +526,13 @@
    ============================================================= */
 .bts-flying-bridge-container {
   position: absolute;
-  top: 110px;
-  left: 20%;
+  top: 95px;
+  left: calc(50% - 280px);
   width: 220px;
   height: 280px;
   pointer-events: none;
-  z-index: 150;
-  animation: flyCardBridge 0.65s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  z-index: 4; /* Layered strictly BEHIND the Right Phone (z-index: 10) */
+  animation: flyCardBridge 0.85s cubic-bezier(0.22, 1, 0.36, 1) forwards;
   transform-origin: center center;
 }
 
@@ -536,28 +542,42 @@
     opacity: 0.95;
     filter: blur(0px) brightness(1);
   }
-  40% {
-    transform: translate3d(140px, -30px, 0) scale(0.92) rotate(6deg);
-    opacity: 0.85;
-    filter: blur(2.5px) brightness(1.25);
+  30% {
+    transform: translate3d(160px, -45px, 0) scale(0.92) rotate(6deg);
+    opacity: 0.88;
+    filter: blur(4px) brightness(1.18);
   }
-  75% {
-    transform: translate3d(310px, -10px, 0) scale(0.96) rotate(2deg);
-    opacity: 0.95;
-    filter: blur(1.5px) brightness(1.15);
+  70% {
+    transform: translate3d(360px, -15px, 0) scale(0.86) rotate(3deg);
+    opacity: 0.8;
+    filter: blur(3.5px) brightness(1.12);
   }
   100% {
-    transform: translate3d(430px, 0px, 0) scale(1) rotate(0deg);
+    transform: translate3d(530px, 10px, 0) scale(0.8) rotate(0deg);
     opacity: 0;
-    filter: blur(0px) brightness(1);
+    filter: blur(2px) brightness(1);
+  }
+}
+
+@media (max-width: 1200px) {
+  .bts-flying-bridge-container {
+    left: calc(50% - 240px);
+  }
+  @keyframes flyCardBridge {
+    0% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.95; filter: blur(0px); }
+    50% { transform: translate3d(180px, -30px, 0) scale(0.9); opacity: 0.85; filter: blur(3.5px); }
+    100% { transform: translate3d(400px, 0px, 0) scale(0.82); opacity: 0; filter: blur(2px); }
   }
 }
 
 @media (max-width: 992px) {
+  .bts-flying-bridge-container {
+    left: calc(50% - 200px);
+  }
   @keyframes flyCardBridge {
     0% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.95; filter: blur(0px); }
-    50% { transform: translate3d(100px, -20px, 0) scale(0.92); opacity: 0.85; filter: blur(2px); }
-    100% { transform: translate3d(240px, 0px, 0) scale(1); opacity: 0; filter: blur(0px); }
+    50% { transform: translate3d(120px, -20px, 0) scale(0.92); opacity: 0.85; filter: blur(3px); }
+    100% { transform: translate3d(260px, 0px, 0) scale(0.85); opacity: 0; filter: blur(1.5px); }
   }
 }
 
@@ -747,6 +767,8 @@
   align-items: center;
   width: 100%;
   max-width: 325px;
+  position: relative;
+  z-index: 10;
 }
 
 .bts-phone-pill-tag {

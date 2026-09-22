@@ -311,24 +311,24 @@ function PhoneMatrixShowcase({
     const swipedCard = DATING_SWIPE_CARDS[currentIndex];
     setFlyingCard(swipedCard);
     setSwipeDirection(direction);
+    setIsFlying(true); // Launch flight simultaneously as left card swipes out
 
-    // 1. Swipe card out of left phone
+    // 1. Flying card travels across with motion blur and slides behind right phone
     setTimeout(() => {
-      setIsFlying(true);
-    }, 200);
-
-    // 2. Flying card arrives at right phone, update index, start laser scan
-    setTimeout(() => {
-      onIndexChange(targetIndex);
       setIsFlying(false);
       setSwipeDirection(null);
-      setIsScanning(true);
-    }, 750);
+    }, 850);
 
-    // 3. Complete laser scanning on right phone
+    // 2. Wait 1 full second (1000ms pause) behind the right phone before laser scan begins
+    setTimeout(() => {
+      onIndexChange(targetIndex);
+      setIsScanning(true);
+    }, 1850);
+
+    // 3. Complete laser scanning on right phone and reveal deep synergy match
     setTimeout(() => {
       setIsScanning(false);
-    }, 1700);
+    }, 3100);
   };
 
   // 6-Second Auto-Looping Animation
