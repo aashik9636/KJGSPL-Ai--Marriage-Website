@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "./beyond-the-spark/beyond-spark.css";
 export const metadata: Metadata = {
   title: "AI Marriage — Beyond the spark",
   description:

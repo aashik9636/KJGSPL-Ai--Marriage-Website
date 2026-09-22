@@ -287,40 +287,83 @@ const SYNERGY_POINTS = [
 ];
 
 // -------------------------------------------------------------
-// LEFT PHONE: INTERACTIVE SINGLE-CARD SWIPE DISCOVERY
 // -------------------------------------------------------------
-interface LeftSwipeDiscoveryProps {
+// COORDINATED PHONE COMPARISON MATRIX (6-SEC LOOP + FLYING TRANSFORMATION)
+// -------------------------------------------------------------
+function PhoneMatrixShowcase({
+  currentIndex,
+  onIndexChange,
+}: {
   currentIndex: number;
-  onIndexChange: (index: number) => void;
-}
-
-function LeftSwipeDiscovery({ currentIndex, onIndexChange }: LeftSwipeDiscoveryProps) {
+  onIndexChange: (idx: number) => void;
+}) {
   const [swipeDirection, setSwipeDirection] = useState<"left" | "right" | "up" | null>(null);
-  const [isAnimating, setIsAnimating] = useState(false);
+  const [isFlying, setIsFlying] = useState(false);
+  const [isScanning, setIsScanning] = useState(false);
+  const [flyingCard, setFlyingCard] = useState(DATING_SWIPE_CARDS[0]);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
-  const isDraggingRef = React.useRef(false);
-  const startPos = React.useRef({ x: 0, y: 0 });
+  const isDraggingRef = useRef(false);
+  const startPos = useRef({ x: 0, y: 0 });
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  const handleSwipe = (direction: "left" | "right" | "up", action: "next" | "prev" = "next") => {
-    if (isAnimating) return;
-    setIsAnimating(true);
+  // Trigger full flying transition from Left Phone to Right Phone
+  const triggerTransition = (targetIndex: number, direction: "right" | "left" = "right") => {
+    const swipedCard = DATING_SWIPE_CARDS[currentIndex];
+    setFlyingCard(swipedCard);
     setSwipeDirection(direction);
-    setDragOffset({ x: 0, y: 0 });
-    isDraggingRef.current = false;
 
+    // 1. Swipe card out of left phone
     setTimeout(() => {
-      if (action === "prev") {
-        onIndexChange((currentIndex - 1 + DATING_SWIPE_CARDS.length) % DATING_SWIPE_CARDS.length);
-      } else {
-        onIndexChange((currentIndex + 1) % DATING_SWIPE_CARDS.length);
-      }
+      setIsFlying(true);
+    }, 200);
+
+    // 2. Flying card arrives at right phone, update index, start laser scan
+    setTimeout(() => {
+      onIndexChange(targetIndex);
+      setIsFlying(false);
       setSwipeDirection(null);
-      setIsAnimating(false);
-    }, 580);
+      setIsScanning(true);
+    }, 750);
+
+    // 3. Complete laser scanning on right phone
+    setTimeout(() => {
+      setIsScanning(false);
+    }, 1700);
   };
 
+  // 6-Second Auto-Looping Animation
+  useEffect(() => {
+    timerRef.current = setInterval(() => {
+      const nextIdx = (currentIndex + 1) % DATING_SWIPE_CARDS.length;
+      triggerTransition(nextIdx, "right");
+    }, 6000);
+
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [currentIndex]);
+
+  const handleManualNext = () => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    const nextIdx = (currentIndex + 1) % DATING_SWIPE_CARDS.length;
+    triggerTransition(nextIdx, "right");
+  };
+
+  const handleManualPrev = () => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    const prevIdx = (currentIndex - 1 + DATING_SWIPE_CARDS.length) % DATING_SWIPE_CARDS.length;
+    triggerTransition(prevIdx, "left");
+  };
+
+  const handleTabClick = (idx: number) => {
+    if (idx === currentIndex) return;
+    if (timerRef.current) clearInterval(timerRef.current);
+    triggerTransition(idx, "right");
+  };
+
+  // Touch & Mouse Drag Handlers for Left Phone
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (isAnimating) return;
+    if (swipeDirection || isFlying) return;
     if (e.pointerType === "mouse" && e.button !== 0) return;
     isDraggingRef.current = true;
     startPos.current = { x: e.clientX, y: e.clientY };
@@ -331,7 +374,7 @@ function LeftSwipeDiscovery({ currentIndex, onIndexChange }: LeftSwipeDiscoveryP
   };
 
   const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!isDraggingRef.current || isAnimating) return;
+    if (!isDraggingRef.current || swipeDirection || isFlying) return;
     const dx = e.clientX - startPos.current.x;
     const dy = e.clientY - startPos.current.y;
     setDragOffset({ x: dx, y: dy });
@@ -345,37 +388,24 @@ function LeftSwipeDiscovery({ currentIndex, onIndexChange }: LeftSwipeDiscoveryP
     } catch {}
 
     const dx = e.clientX - startPos.current.x;
-    const dy = e.clientY - startPos.current.y;
-
     if (dx > 40) {
-      handleSwipe("right", "next");
+      handleManualNext();
     } else if (dx < -40) {
-      handleSwipe("left", "next");
-    } else if (dy < -45) {
-      handleSwipe("up", "next");
+      handleManualPrev();
     } else {
       setDragOffset({ x: 0, y: 0 });
     }
   };
 
-  const handlePointerCancel = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!isDraggingRef.current) return;
-    isDraggingRef.current = false;
-    try {
-      e.currentTarget.releasePointerCapture(e.pointerId);
-    } catch {}
-    setDragOffset({ x: 0, y: 0 });
-  };
-
-  const currentCard = DATING_SWIPE_CARDS[currentIndex];
+  const currentLeftCard = DATING_SWIPE_CARDS[currentIndex];
   const cardLayer1 = DATING_SWIPE_CARDS[(currentIndex + 1) % DATING_SWIPE_CARDS.length];
   const cardLayer2 = DATING_SWIPE_CARDS[(currentIndex + 2) % DATING_SWIPE_CARDS.length];
   const cardLayer3 = DATING_SWIPE_CARDS[(currentIndex + 3) % DATING_SWIPE_CARDS.length];
+  const currentRightPoint = SYNERGY_POINTS[currentIndex];
 
   const isDraggingActive = dragOffset.x !== 0 || dragOffset.y !== 0;
   const dragLikeOpacity = !swipeDirection && dragOffset.x > 15 ? Math.min(1, dragOffset.x / 50) : 0;
   const dragNopeOpacity = !swipeDirection && dragOffset.x < -15 ? Math.min(1, -dragOffset.x / 50) : 0;
-  const dragSuperOpacity = !swipeDirection && dragOffset.y < -20 && Math.abs(dragOffset.x) < 40 ? Math.min(1, -dragOffset.y / 60) : 0;
 
   const cardStyle: React.CSSProperties | undefined = isDraggingActive && !swipeDirection
     ? {
@@ -387,358 +417,313 @@ function LeftSwipeDiscovery({ currentIndex, onIndexChange }: LeftSwipeDiscoveryP
     : undefined;
 
   return (
-    <div className="bts-phone-column">
-      <div className="bts-phone-pill-tag swipe-pill">
-        <XCircle size={14} /> Superficial Browsing (Other Matrimony Apps)
-      </div>
-
-      <div className="bts-phone-device phone-swipe-theme">
-        {/* Dynamic Island & Status Bar */}
-        <div className="bts-phone-notch-bar">
-          <span className="bts-phone-time">5:15</span>
-          <div className="bts-phone-island" />
-          <div className="bts-phone-status-icons">
-            <span className="bts-signal-bar" />
-            <span className="bts-battery-icon" />
+    <div className="bts-phone-matrix-showcase">
+      {/* Central Ethereal Flying Card Bridge Overlay */}
+      {isFlying && (
+        <div className="bts-flying-bridge-container">
+          <div className="bts-flying-card-particle-aura" />
+          <div className="bts-flying-card-body">
+            <img src={flyingCard.img} alt={flyingCard.name} className="bts-flying-photo" />
+            <div className="bts-flying-scan-badge">
+              <Sparkles size={11} className="animate-spin text-amber-300" />
+              <span>AI Transforming to Deep Synergy...</span>
+            </div>
           </div>
+          {/* Glowing particle trail sparkles */}
+          <span className="bts-particle p1">✧</span>
+          <span className="bts-particle p2">✦</span>
+          <span className="bts-particle p3">✨</span>
+        </div>
+      )}
+
+      {/* LEFT PHONE: SUPERFICIAL FILTER SWIPING */}
+      <div className="bts-phone-column">
+        <div className="bts-phone-pill-tag swipe-pill">
+          <XCircle size={14} /> Superficial Browsing (Other Matrimony Apps)
         </div>
 
-        {/* Top App Header with Swipe Counter */}
-        <div className="bts-phone-app-header swipe-app-header">
-          <span className="bts-app-sub">Swipe &amp; Filter · Surface Biodata</span>
-          <span className="bts-swipe-counter-badge">{currentIndex + 1} / {DATING_SWIPE_CARDS.length}</span>
-        </div>
-
-        {/* Inner Screen Content - Single Card Swipe Deck */}
-        <div className="bts-phone-screen-content bts-single-card-deck-screen">
-          <div className="bts-card-stack-viewport">
-            {/* Layer 3: 4th Card in Deck (Tilted Left) */}
-            <div className="bts-deck-stack-card bts-deck-layer-3">
-              <div className="bts-card-image-wrap">
-                <img src={cardLayer3.img} alt={cardLayer3.name} className="bts-card-photo" draggable={false} />
-              </div>
-              <div className="bts-card-info-pane">
-                <div className="bts-swipe-profile-header">
-                  <h4>{cardLayer3.name}</h4>
-                  <span className="bts-swipe-role-tag">{cardLayer3.role}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Layer 2: 3rd Card in Deck (Tilted Right) */}
-            <div className="bts-deck-stack-card bts-deck-layer-2">
-              <div className="bts-card-image-wrap">
-                <img src={cardLayer2.img} alt={cardLayer2.name} className="bts-card-photo" draggable={false} />
-              </div>
-              <div className="bts-card-info-pane">
-                <div className="bts-swipe-profile-header">
-                  <h4>{cardLayer2.name}</h4>
-                  <span className="bts-swipe-role-tag">{cardLayer2.role}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Layer 1: 2nd Card in Deck (Immediate Next, Tilted Slightly Left) */}
-            <div className="bts-deck-stack-card bts-deck-layer-1">
-              <div className="bts-card-image-wrap">
-                <img src={cardLayer1.img} alt={cardLayer1.name} className="bts-card-photo" draggable={false} />
-                <div className="bts-swipe-card-badge">
-                  <span>{cardLayer1.distance}</span>
-                </div>
-              </div>
-              <div className="bts-card-info-pane">
-                <div className="bts-swipe-profile-header">
-                  <h4>{cardLayer1.name}</h4>
-                  <span className="bts-swipe-role-tag">{cardLayer1.role}</span>
-                </div>
-                <p className="bts-swipe-bio-quote">{cardLayer1.quote}</p>
-                <div className="bts-card-pitfall-alert">
-                  <div className="bts-pitfall-alert-head">
-                    <XCircle size={11} className="text-red-600" />
-                    <strong>{cardLayer1.pitfallTitle}</strong>
-                  </div>
-                  <span>{cardLayer1.pitfallDesc}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Layer 0: Active Primary Swipe Card */}
-            <div
-              className={`bts-deck-top-card ${
-                swipeDirection === "left"
-                  ? "fly-out-left"
-                  : swipeDirection === "right"
-                  ? "fly-out-right"
-                  : swipeDirection === "up"
-                  ? "fly-out-up"
-                  : ""
-              }`}
-              style={cardStyle}
-              onPointerDown={handlePointerDown}
-              onPointerMove={handlePointerMove}
-              onPointerUp={handlePointerUp}
-              onPointerCancel={handlePointerCancel}
-              title="Drag or use buttons to swipe"
-            >
-              <div className="bts-card-image-wrap">
-                <img src={currentCard.img} alt={currentCard.name} className="bts-card-photo" draggable={false} />
-                
-                {/* Distance Badge */}
-                <div className="bts-swipe-card-badge">
-                  <span>{currentCard.distance}</span>
-                </div>
-
-                {/* Swipe Action Stamps (Animated or Dragged) */}
-                {(swipeDirection === "right" || dragLikeOpacity > 0) && (
-                  <div
-                    className="bts-swipe-stamp stamp-like"
-                    style={{ opacity: swipeDirection === "right" ? 1 : dragLikeOpacity }}
-                  >
-                    LIKE
-                  </div>
-                )}
-                {(swipeDirection === "left" || dragNopeOpacity > 0) && (
-                  <div
-                    className="bts-swipe-stamp stamp-nope"
-                    style={{ opacity: swipeDirection === "left" ? 1 : dragNopeOpacity }}
-                  >
-                    PASS
-                  </div>
-                )}
-                {(swipeDirection === "up" || dragSuperOpacity > 0) && (
-                  <div
-                    className="bts-swipe-stamp stamp-super"
-                    style={{ opacity: swipeDirection === "up" ? 1 : dragSuperOpacity }}
-                  >
-                    SUPER
-                  </div>
-                )}
-              </div>
-
-              {/* Profile Details & Pitfall Alert Strictly Below Image */}
-              <div className="bts-card-info-pane">
-                <div className="bts-swipe-profile-header">
-                  <div className="bts-profile-name-row">
-                    <h4>{currentCard.name}</h4>
-                    <span className="bts-casual-chip">{currentCard.tag || "Casual Match"}</span>
-                  </div>
-                  <span className="bts-swipe-role-tag">📍 {currentCard.role}</span>
-                </div>
-
-                <div className="bts-bio-quote-container">
-                  <p className="bts-swipe-bio-quote">{currentCard.quote}</p>
-                </div>
-
-                {/* Built-in Pitfall Warning Banner */}
-                <div className="bts-card-pitfall-alert">
-                  <div className="bts-pitfall-alert-head">
-                    <XCircle size={12} className="text-rose-600 shrink-0" />
-                    <strong>{currentCard.pitfallTitle}</strong>
-                  </div>
-                  <span>{currentCard.pitfallDesc}</span>
-                </div>
-              </div>
+        <div className="bts-phone-device phone-swipe-theme">
+          <div className="bts-phone-notch-bar">
+            <span className="bts-phone-time">5:15</span>
+            <div className="bts-phone-island" />
+            <div className="bts-phone-status-icons">
+              <span className="bts-signal-bar" />
+              <span className="bts-battery-icon" />
             </div>
           </div>
 
-          {/* Interactive Swipe Navigation Controls */}
-          <div className="bts-swipe-nav-row">
-            <button
-              type="button"
-              className="bts-swipe-nav-btn bts-swipe-prev-btn"
-              onClick={() => handleSwipe("left", "prev")}
-              disabled={isAnimating}
-              title="Previous Dilemma"
-            >
-              <ArrowLeft size={12} />
-              <span>Prev</span>
-            </button>
-
-            <div className="bts-swipe-deck-indicator">
-              <span>{currentIndex + 1} / {DATING_SWIPE_CARDS.length}</span>
-              <span className="bts-swipe-cue-text">Swipe ⇄</span>
-            </div>
-
-            <button
-              type="button"
-              className="bts-swipe-nav-btn bts-swipe-next-btn"
-              onClick={() => handleSwipe("right", "next")}
-              disabled={isAnimating}
-              title="Next Dilemma"
-            >
-              <span>Next</span>
-              <ArrowRight size={12} />
-            </button>
+          <div className="bts-phone-app-header swipe-app-header">
+            <span className="bts-app-sub">Swipe &amp; Filter · Surface Biodata</span>
+            <span className="bts-swipe-counter-badge">{currentIndex + 1} / {DATING_SWIPE_CARDS.length}</span>
           </div>
-        </div>
 
-        <div className="bts-phone-bottom-indicator" />
-      </div>
-
-      <div className="bts-phone-caption-summary">
-        <h4>Designed for Endless Scrolling</h4>
-        <p>Generic filters and photo-swiping loops that keep you searching without ever uncovering real emotional compatibility.</p>
-      </div>
-    </div>
-  );
-}
-
-// -------------------------------------------------------------
-// RIGHT PHONE: AI COMPATIBILITY MATRIMONIAL HARMONY
-// -------------------------------------------------------------
-interface RightCompatibilityScanProps {
-  activeIndex: number;
-  onIndexChange: (index: number) => void;
-}
-
-function RightCompatibilityScan({ activeIndex, onIndexChange }: RightCompatibilityScanProps) {
-  const currentPoint = SYNERGY_POINTS[activeIndex];
-  const [isScanning, setIsScanning] = useState(false);
-
-  useEffect(() => {
-    setIsScanning(true);
-    const timer = setTimeout(() => {
-      setIsScanning(false);
-    }, 750);
-    return () => clearTimeout(timer);
-  }, [activeIndex]);
-
-  const handleNextPoint = () => {
-    onIndexChange((activeIndex + 1) % SYNERGY_POINTS.length);
-  };
-
-  return (
-    <div className="bts-phone-column">
-      <div className="bts-phone-pill-tag synergy-pill">
-        <CheckCircle2 size={14} /> Deep Resonance (AI Marriage)
-      </div>
-
-      <div className="bts-phone-device phone-synergy-theme">
-        {/* Dynamic Island & Status Bar */}
-        <div className="bts-phone-notch-bar">
-          <span className="bts-phone-time">5:15</span>
-          <div className="bts-phone-island" />
-          <div className="bts-phone-status-icons">
-            <span className="bts-signal-bar" />
-            <span className="bts-battery-icon" />
-          </div>
-        </div>
-
-        {/* Top App Header */}
-        <div className="bts-phone-app-header synergy-app-header">
-          <span className="bts-app-sub">Synergy AI · 40-Year Harmony Matrix</span>
-          <span className="bts-swipe-counter-badge">{activeIndex + 1} / {SYNERGY_POINTS.length}</span>
-        </div>
-
-        {/* Inner Screen Content - Prominent Visual Synergy Showcase */}
-        <div className="bts-phone-screen-content bts-synergy-deck-screen">
-          <div className="bts-card-stack-viewport">
-            {/* Active AI Compatibility Feature Card with Prominent Image */}
-            <div
-              key={activeIndex}
-              className="bts-synergy-feature-card bts-synergy-fade-in"
-              onClick={handleNextPoint}
-              title="Click to view next synergy point"
-            >
-              <div className="bts-card-image-wrap">
-                <img
-                  src={currentPoint.img}
-                  alt={currentPoint.title}
-                  className={`bts-card-photo ${isScanning ? "scanning-photo" : ""}`}
-                  draggable={false}
-                />
-
-                {/* AI Laser Scanning Beam & Holographic Overlay */}
-                {isScanning && (
-                  <div className="bts-ai-scan-laser-overlay">
-                    <div className="bts-ai-laser-line" />
-                    <div className="bts-ai-scanning-pill">
-                      <Sparkles size={10} className="animate-spin text-amber-300" />
-                      <span>AI Decoding 40-Yr Synergy...</span>
-                    </div>
-                  </div>
-                )}
-
-                {/* Compatibility Score & Verified Badges */}
-                <div className="bts-synergy-badge-top-left">
-                  <Sparkles size={10} className="text-amber-300" />
-                  <span>{currentPoint.score}</span>
+          <div className="bts-phone-screen-content bts-single-card-deck-screen">
+            <div className="bts-card-stack-viewport">
+              {/* Layer 3 */}
+              <div className="bts-deck-stack-card bts-deck-layer-3">
+                <div className="bts-card-image-wrap">
+                  <img src={cardLayer3.img} alt={cardLayer3.name} className="bts-card-photo" draggable={false} />
                 </div>
-                <div className="bts-synergy-badge-top-right">
-                  <span>🛡️ Verified Match</span>
+                <div className="bts-card-info-pane">
+                  <div className="bts-swipe-profile-header">
+                    <h4>{cardLayer3.name}</h4>
+                    <span className="bts-swipe-role-tag">{cardLayer3.role}</span>
+                  </div>
                 </div>
               </div>
 
-              {/* Card Details & AI Solution Banner Strictly Below Image */}
-              <div className="bts-card-info-pane synergy-info-pane">
-                <div className="bts-swipe-profile-header">
-                  <div className="bts-profile-name-row">
-                    <h4>{currentPoint.coupleName}</h4>
-                    <span className="bts-synergy-verified-chip">{currentPoint.coupleTag}</span>
-                  </div>
-                  <span className="bts-swipe-role-tag synergy-role-tag">{currentPoint.highlight}</span>
+              {/* Layer 2 */}
+              <div className="bts-deck-stack-card bts-deck-layer-2">
+                <div className="bts-card-image-wrap">
+                  <img src={cardLayer2.img} alt={cardLayer2.name} className="bts-card-photo" draggable={false} />
                 </div>
-
-                {/* Multi-Vector Staggered Compatibility Breakdown */}
-                {currentPoint.vectors && (
-                  <div className="bts-ai-vectors-grid">
-                    {currentPoint.vectors.map((vec, vIdx) => (
-                      <div key={vIdx} className="bts-ai-vector-badge">
-                        <span className="vector-icon">{vec.icon}</span>
-                        <span className="vector-label">{vec.label}</span>
-                        <span className="vector-score">{vec.score}</span>
-                      </div>
-                    ))}
+                <div className="bts-card-info-pane">
+                  <div className="bts-swipe-profile-header">
+                    <h4>{cardLayer2.name}</h4>
+                    <span className="bts-swipe-role-tag">{cardLayer2.role}</span>
                   </div>
-                )}
-
-                <div className="bts-bio-quote-container synergy-quote-container">
-                  <p className="bts-swipe-bio-quote synergy-bio-quote">{currentPoint.quote}</p>
-                </div>
-
-                {/* Built-in Solution Advantage Alert (Green / Emerald) */}
-                <div className="bts-card-solution-alert">
-                  <div className="bts-solution-alert-head">
-                    <CheckCircle2 size={12} className="text-emerald-600 shrink-0" />
-                    <strong>{currentPoint.title}</strong>
-                  </div>
-                  <span>{currentPoint.desc}</span>
                 </div>
               </div>
-            </div>
-          </div>
 
-          {/* 4 Interactive Synergy Selection Tabs */}
-          <div className="bts-synergy-tabs-row">
-            {SYNERGY_POINTS.map((item, idx) => (
-              <button
-                key={item.id}
-                className={`bts-synergy-tab-btn ${activeIndex === idx ? "active-tab" : ""}`}
-                onClick={() => onIndexChange(idx)}
-                title={item.title}
+              {/* Layer 1 */}
+              <div className="bts-deck-stack-card bts-deck-layer-1">
+                <div className="bts-card-image-wrap">
+                  <img src={cardLayer1.img} alt={cardLayer1.name} className="bts-card-photo" draggable={false} />
+                  <div className="bts-swipe-card-badge">
+                    <span>{cardLayer1.distance}</span>
+                  </div>
+                </div>
+                <div className="bts-card-info-pane">
+                  <div className="bts-swipe-profile-header">
+                    <h4>{cardLayer1.name}</h4>
+                    <span className="bts-swipe-role-tag">{cardLayer1.role}</span>
+                  </div>
+                  <p className="bts-swipe-bio-quote">{cardLayer1.quote}</p>
+                </div>
+              </div>
+
+              {/* Layer 0: Active Top Card with Swipe Out animation */}
+              <div
+                className={`bts-deck-top-card ${
+                  swipeDirection === "left"
+                    ? "fly-out-left"
+                    : swipeDirection === "right"
+                    ? "fly-out-right"
+                    : ""
+                }`}
+                style={cardStyle}
+                onPointerDown={handlePointerDown}
+                onPointerMove={handlePointerMove}
+                onPointerUp={handlePointerUp}
+                title="Drag or use buttons to swipe"
               >
-                {item.tabLabel}
+                <div className="bts-card-image-wrap">
+                  <img src={currentLeftCard.img} alt={currentLeftCard.name} className="bts-card-photo" draggable={false} />
+                  
+                  <div className="bts-swipe-card-badge">
+                    <span>{currentLeftCard.distance}</span>
+                  </div>
+
+                  {(swipeDirection === "right" || dragLikeOpacity > 0) && (
+                    <div className="bts-swipe-stamp stamp-like" style={{ opacity: swipeDirection === "right" ? 1 : dragLikeOpacity }}>
+                      LIKE
+                    </div>
+                  )}
+                  {(swipeDirection === "left" || dragNopeOpacity > 0) && (
+                    <div className="bts-swipe-stamp stamp-nope" style={{ opacity: swipeDirection === "left" ? 1 : dragNopeOpacity }}>
+                      PASS
+                    </div>
+                  )}
+                </div>
+
+                <div className="bts-card-info-pane">
+                  <div className="bts-swipe-profile-header">
+                    <div className="bts-profile-name-row">
+                      <h4>{currentLeftCard.name}</h4>
+                      <span className="bts-casual-chip">{currentLeftCard.tag || "Casual Match"}</span>
+                    </div>
+                    <span className="bts-swipe-role-tag">📍 {currentLeftCard.role}</span>
+                  </div>
+
+                  <div className="bts-bio-quote-container">
+                    <p className="bts-swipe-bio-quote">{currentLeftCard.quote}</p>
+                  </div>
+
+                  <div className="bts-card-pitfall-alert">
+                    <div className="bts-pitfall-alert-head">
+                      <XCircle size={12} className="text-rose-600 shrink-0" />
+                      <strong>{currentLeftCard.pitfallTitle}</strong>
+                    </div>
+                    <span>{currentLeftCard.pitfallDesc}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Navigation Controls with Loop Cue */}
+            <div className="bts-swipe-nav-row">
+              <button
+                type="button"
+                className="bts-swipe-nav-btn bts-swipe-prev-btn"
+                onClick={handleManualPrev}
+                disabled={swipeDirection !== null || isFlying}
+                title="Previous Profile"
+              >
+                <ArrowLeft size={12} />
+                <span>Prev</span>
               </button>
-            ))}
+
+              <div className="bts-swipe-deck-indicator">
+                <span>{currentIndex + 1} / {DATING_SWIPE_CARDS.length}</span>
+                <span className="bts-swipe-cue-text">Auto 6s ↻</span>
+              </div>
+
+              <button
+                type="button"
+                className="bts-swipe-nav-btn bts-swipe-next-btn"
+                onClick={handleManualNext}
+                disabled={swipeDirection !== null || isFlying}
+                title="Next Profile (Swipe &amp; Transform)"
+              >
+                <span>Next</span>
+                <ArrowRight size={12} />
+              </button>
+            </div>
           </div>
 
-          {/* AI Marriage Dialogue CTA */}
-          <div className="bts-aim-action-wrap">
-            <Link href="/register/step-1" className="bts-aim-phone-btn">
-              <Lock size={12} />
-              <span>Begin Private Dialogue</span>
-              <ArrowRight size={12} />
-            </Link>
-            <span className="bts-aim-secure-note">🛡️ Protected by 256-bit Encrypted Vault</span>
-          </div>
+          <div className="bts-phone-bottom-indicator" />
         </div>
 
-        <div className="bts-phone-bottom-indicator" />
+        <div className="bts-phone-caption-summary">
+          <h4>Designed for Endless Scrolling</h4>
+          <p>Generic filters and photo-swiping loops that keep you searching without ever uncovering real emotional compatibility.</p>
+        </div>
       </div>
 
-      <div className="bts-phone-caption-summary">
-        <h4>Engineered for Lifelong Synergy</h4>
-        <p>Multi-dimensional matching across emotional safety, conflict repair cadence, and shared financial vision.</p>
+      {/* RIGHT PHONE: AI COMPATIBILITY & LASER SCANNING */}
+      <div className="bts-phone-column">
+        <div className="bts-phone-pill-tag synergy-pill">
+          <CheckCircle2 size={14} /> Deep Resonance (AI Marriage)
+        </div>
+
+        <div className="bts-phone-device phone-synergy-theme">
+          <div className="bts-phone-notch-bar">
+            <span className="bts-phone-time">5:15</span>
+            <div className="bts-phone-island" />
+            <div className="bts-phone-status-icons">
+              <span className="bts-signal-bar" />
+              <span className="bts-battery-icon" />
+            </div>
+          </div>
+
+          <div className="bts-phone-app-header synergy-app-header">
+            <span className="bts-app-sub">Synergy AI · 40-Year Harmony Matrix</span>
+            <span className="bts-swipe-counter-badge">{currentIndex + 1} / {SYNERGY_POINTS.length}</span>
+          </div>
+
+          <div className="bts-phone-screen-content bts-synergy-deck-screen">
+            <div className="bts-card-stack-viewport">
+              <div
+                key={currentIndex}
+                className={`bts-synergy-feature-card ${isScanning ? "bts-card-landing" : "bts-synergy-fade-in"}`}
+                onClick={handleManualNext}
+                title="Click to advance synergy profile"
+              >
+                <div className="bts-card-image-wrap">
+                  <img
+                    src={currentRightPoint.img}
+                    alt={currentRightPoint.title}
+                    className={`bts-card-photo ${isScanning ? "scanning-photo" : ""}`}
+                    draggable={false}
+                  />
+
+                  {/* AI Laser Scanning Beam & Holographic Overlay */}
+                  {isScanning && (
+                    <div className="bts-ai-scan-laser-overlay">
+                      <div className="bts-ai-laser-line" />
+                      <div className="bts-ai-scanning-pill">
+                        <Sparkles size={11} className="animate-spin text-amber-300" />
+                        <span>AI Decoding 40-Yr Synergy...</span>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className={`bts-synergy-badge-top-left ${isScanning ? "opacity-0" : ""}`}>
+                    <Sparkles size={10} className="text-amber-300" />
+                    <span>{currentRightPoint.score}</span>
+                  </div>
+                  <div className={`bts-synergy-badge-top-right ${isScanning ? "opacity-0" : ""}`}>
+                    <span>🛡️ Verified Match</span>
+                  </div>
+                </div>
+
+                <div className="bts-card-info-pane synergy-info-pane">
+                  <div className="bts-swipe-profile-header">
+                    <div className="bts-profile-name-row">
+                      <h4>{currentRightPoint.coupleName}</h4>
+                      <span className="bts-synergy-verified-chip">{currentRightPoint.coupleTag}</span>
+                    </div>
+                    <span className="bts-swipe-role-tag synergy-role-tag">{currentRightPoint.highlight}</span>
+                  </div>
+
+                  {currentRightPoint.vectors && (
+                    <div className="bts-ai-vectors-grid">
+                      {currentRightPoint.vectors.map((vec, vIdx) => (
+                        <div key={vIdx} className="bts-ai-vector-badge">
+                          <span className="vector-icon">{vec.icon}</span>
+                          <span className="vector-label">{vec.label}</span>
+                          <span className="vector-score">{vec.score}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="bts-bio-quote-container synergy-quote-container">
+                    <p className="bts-swipe-bio-quote synergy-bio-quote">{currentRightPoint.quote}</p>
+                  </div>
+
+                  <div className="bts-card-solution-alert">
+                    <div className="bts-solution-alert-head">
+                      <CheckCircle2 size={12} className="text-emerald-600 shrink-0" />
+                      <strong>{currentRightPoint.title}</strong>
+                    </div>
+                    <span>{currentRightPoint.desc}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 4 Interactive Synergy Selection Tabs */}
+            <div className="bts-synergy-tabs-row">
+              {SYNERGY_POINTS.map((item, idx) => (
+                <button
+                  key={item.id}
+                  className={`bts-synergy-tab-btn ${currentIndex === idx ? "active-tab" : ""}`}
+                  onClick={() => handleTabClick(idx)}
+                  title={item.title}
+                >
+                  {item.tabLabel}
+                </button>
+              ))}
+            </div>
+
+            <div className="bts-aim-action-wrap">
+              <Link href="/register/step-1" className="bts-aim-phone-btn">
+                <Lock size={12} />
+                <span>Begin Private Dialogue</span>
+                <ArrowRight size={12} />
+              </Link>
+              <span className="bts-aim-secure-note">🛡️ Protected by 256-bit Encrypted Vault</span>
+            </div>
+          </div>
+
+          <div className="bts-phone-bottom-indicator" />
+        </div>
+
+        <div className="bts-phone-caption-summary">
+          <h4>Engineered for Lifelong Synergy</h4>
+          <p>Scientific alignment across 14 emotional, lifestyle, and financial vectors to ensure permanent marital harmony.</p>
+        </div>
       </div>
     </div>
   );
@@ -960,16 +945,10 @@ export default function BeyondTheSparkPage() {
           </div>
 
           {/* 2 Comparative Phone Mockups Display with Cinematic Interactive Simulations */}
-          <div className="bts-phone-matrix-showcase">
-            <LeftSwipeDiscovery
-              currentIndex={matrixIndex}
-              onIndexChange={setMatrixIndex}
-            />
-            <RightCompatibilityScan
-              activeIndex={matrixIndex}
-              onIndexChange={setMatrixIndex}
-            />
-          </div>
+          <PhoneMatrixShowcase
+            currentIndex={matrixIndex}
+            onIndexChange={setMatrixIndex}
+          />
         </div>
       </section>
 
