@@ -1,11 +1,12 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import Link from "next/link";
-import { Heart, ShieldCheck, ArrowLeft } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { Heart } from "lucide-react";
 import { RegistrationProvider, useRegistration } from "@/context/registration-context";
 import "./registration.css";
 
-const STEP_LABELS = [
+const STEP_LABELS: { num: 1 | 2 | 3 | 4; title: string; subtitle: string }[] = [
   { num: 1, title: "Basic Details", subtitle: "Identity & Location" },
   { num: 2, title: "About You", subtitle: "Career & Background" },
   { num: 3, title: "Partner Preferences", subtitle: "Values & Priorities" },
@@ -14,12 +15,42 @@ const STEP_LABELS = [
 
 const RegistrationHeaderAndProgress: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { currentStep, goToStep, goToPrevStep } = useRegistration();
+  const pathname = usePathname();
+
+  // Ensure the page always starts from the absolute top when navigating to or within registration
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+  }, [pathname, currentStep]);
 
   const progressPercent = Math.round((currentStep / 4) * 100);
 
   return (
     <div className="registration-page-wrapper">
+      {/* Top Header */}
+      <header className="registration-top-header">
+        <div className="reg-header-container">
+          <Link href="/" className="brand" aria-label="AI Marriage home">
+            <span className="brand-symbol">
+              <Heart size={18} strokeWidth={1.8} />
+            </span>
+            <span>
+              ai marriage<span className="brand-dot">.</span>
+            </span>
+          </Link>
 
+          <div className="reg-header-center">
+            <span className="reg-step-badge">
+              Step {currentStep} of 4: {STEP_LABELS[currentStep - 1]?.title || "Registration"}
+            </span>
+          </div>
+
+          <div className="reg-header-right">
+            <Link href="/" className="reg-exit-link">
+              Exit to Home
+            </Link>
+          </div>
+        </div>
+      </header>
 
       {/* Stepper Progress Bar */}
       <div className="registration-progress-bar-container">
@@ -39,6 +70,12 @@ const RegistrationHeaderAndProgress: React.FC<{ children: React.ReactNode }> = (
               <div 
                 key={s.num} 
                 className={`reg-step-node ${isCurrent ? "current" : ""} ${isCompleted ? "completed" : ""}`}
+                onClick={() => {
+                  if (s.num <= currentStep) {
+                    goToStep(s.num);
+                  }
+                }}
+                style={{ cursor: s.num <= currentStep ? "pointer" : "default" }}
               >
                 <div className="node-number-circle">
                   {isCompleted ? "✓" : s.num}

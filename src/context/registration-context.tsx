@@ -165,10 +165,6 @@ export const RegistrationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         newErrors.partnerGender = "Please select your partner gender preference";
       }
 
-      if (!formData.preferredAgeRange) {
-        newErrors.preferredAgeRange = "Please select preferred age range";
-      }
-
       if (!formData.preferredLocation) {
         newErrors.preferredLocation = "Please select preferred location preference";
       }
@@ -179,9 +175,7 @@ export const RegistrationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     }
 
     if (step === 4) {
-      if (!formData.marriageIntent) {
-        newErrors.marriageIntent = "Please select what you are looking for";
-      }
+      // Step 4 bio is optional
     }
 
     setErrors(newErrors);

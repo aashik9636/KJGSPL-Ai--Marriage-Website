@@ -21,13 +21,6 @@ const PARTNER_GENDER_OPTIONS = [
   { id: "Other", label: "Other / Prefer not to say" },
 ];
 
-const AGE_RANGE_OPTIONS = [
-  { id: "21–25", label: "21 – 25 years" },
-  { id: "26–30", label: "26 – 30 years" },
-  { id: "31–35", label: "31 – 35 years" },
-  { id: "36–40", label: "36 – 40 years" },
-  { id: "Other", label: "Other / Flexible" },
-];
 
 const LOCATION_OPTIONS = [
   { id: "Same City", label: "Same City", desc: "Local city proximity" },
@@ -106,29 +99,6 @@ export default function Step3PartnerPreferencesPage() {
           {errors.partnerGender && <span className="error-msg">{errors.partnerGender}</span>}
         </div>
 
-        {/* Preferred Age Range */}
-        <div className={`form-group full-width ${errors.preferredAgeRange ? "has-error" : ""}`}>
-          <label>
-            Preferred Age Range <span className="required-star">*</span>
-          </label>
-          <div className="age-chips-grid">
-            {AGE_RANGE_OPTIONS.map((age) => {
-              const isSelected = formData.preferredAgeRange === age.id;
-              return (
-                <button
-                  type="button"
-                  key={age.id}
-                  className={`age-chip ${isSelected ? "selected" : ""}`}
-                  onClick={() => updateField("preferredAgeRange", age.id)}
-                >
-                  <span className="chip-radio-circle">{isSelected && <span className="inner-dot" />}</span>
-                  <span>{age.label}</span>
-                </button>
-              );
-            })}
-          </div>
-          {errors.preferredAgeRange && <span className="error-msg">{errors.preferredAgeRange}</span>}
-        </div>
 
         {/* Preferred Location */}
         <div className={`form-group full-width ${errors.preferredLocation ? "has-error" : ""}`}>

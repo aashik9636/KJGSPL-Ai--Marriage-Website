@@ -32,6 +32,23 @@ html {
   scroll-padding-top: 85px;
 }
 
+section,
+#story,
+#experience,
+#preview,
+#moments,
+#more-ways,
+#membership,
+.philosophy-section,
+.experience,
+.product-showcase-section,
+.moments,
+.bento,
+.membership,
+.trust-section {
+  scroll-margin-top: 85px;
+}
+
 body {
   margin: 0;
   background: var(--cream);
@@ -156,11 +173,13 @@ img {
   color: #5c444c;
   position: relative;
   font-weight: 500;
-  transition: color 0.2s ease;
+  transition: color 0.25s ease, font-weight 0.25s ease;
 }
 
-.site-header nav a:hover {
+.site-header nav a:hover,
+.site-header nav a.active {
   color: var(--ink);
+  font-weight: 600;
 }
 
 .site-header nav a:after {
@@ -169,12 +188,13 @@ img {
   bottom: 2px;
   left: 0;
   width: 0;
-  height: 1.5px;
+  height: 2px;
   background: var(--ink);
   transition: width 0.25s ease;
 }
 
-.site-header nav a:hover:after {
+.site-header nav a:hover:after,
+.site-header nav a.active:after {
   width: 100%;
 }
 
@@ -814,7 +834,7 @@ img {
 }
 
 .experience {
-  padding: 105px 7% 60px;
+  padding: 44px 7% 48px;
   max-width: 1600px;
   margin: auto;
 }
@@ -1305,7 +1325,7 @@ img {
 }
 
 .membership {
-  padding: 100px 7% 110px;
+  padding: 48px 7% 56px;
   background: #f4eae4;
   border: none;
 }
@@ -3824,7 +3844,7 @@ footer>span {
    PRODUCT SHOWCASE SECTION (4-Phone Mockups)
 ------------------------------------------------------------- */
 .product-showcase-section {
-  padding: 85px 4% 60px;
+  padding: 44px 4% 48px;
   background: var(--cream);
   border: none;
   position: relative;
@@ -3834,7 +3854,7 @@ footer>span {
 .showcase-header {
   text-align: center;
   max-width: 680px;
-  margin: 0 auto 38px;
+  margin: 0 auto 24px;
 }
 
 .showcase-header .eyebrow {
@@ -4695,7 +4715,7 @@ footer>span {
    MOMENTS SECTION (Real Connection. Real Life.)
 ------------------------------------------------------------- */
 .moments-section {
-  padding: 100px 7% 120px;
+  padding: 48px 7% 56px;
   background: var(--cream);
   border: none;
   position: relative;
@@ -4970,7 +4990,7 @@ footer>span {
    BENTO GRID SECTION: More ways to find your kind of connection
 ------------------------------------------------------------- */
 .more-ways-section {
-  padding: 100px 7% 120px;
+  padding: 48px 7% 56px;
   background: var(--cream);
   border: none;
   position: relative;
@@ -4982,7 +5002,7 @@ footer>span {
   justify-content: space-between;
   align-items: flex-end;
   max-width: 1320px;
-  margin: 0 auto 45px;
+  margin: 0 auto 28px;
   gap: 30px;
   flex-wrap: wrap;
 }
@@ -8184,7 +8204,7 @@ footer>span {
 .philosophy-section,
 #story.philosophy-section {
   position: relative;
-  padding: 105px 5% 115px;
+  padding: 44px 5% 56px;
   background: linear-gradient(180deg, #faf5f0 0%, #eee4d8 15%, #e6d8c7 50%, #eee4d8 85%, #faf5f0 100%) !important;
   overflow: hidden;
   text-align: center;
@@ -8204,7 +8224,7 @@ footer>span {
 
 .philosophy-header {
   max-width: 720px;
-  margin: 0 auto 48px;
+  margin: 0 auto 24px;
   display: flex;
   flex-direction: column;
   align-items: center;

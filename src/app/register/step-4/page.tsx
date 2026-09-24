@@ -9,26 +9,6 @@ import {
 } from "lucide-react";
 
 
-const INTENT_OPTIONS = [
-  {
-    id: "Serious Marriage",
-    title: "Serious Marriage",
-    desc: "Ready to marry within 1-2 years with intentional family alignment.",
-    badge: "Most Popular",
-  },
-  {
-    id: "Finding a Life Partner",
-    title: "Finding a Life Partner",
-    desc: "Building a deep, meaningful long-term relationship leading to marriage.",
-    badge: "High Intent",
-  },
-  {
-    id: "Exploring Compatibility",
-    title: "Exploring Compatibility",
-    desc: "Thoughtfully getting to know verified individuals with aligned life visions.",
-    badge: "Thoughtful",
-  },
-];
 
 const SUGGESTED_PROMPTS = [
   "“Building a life that feels as good as a slow Sunday morning.”",
@@ -67,40 +47,6 @@ export default function Step4ExpectationsPage() {
 
       {/* Form Fields */}
       <div className="reg-fields-grid">
-        {/* What are you looking for? */}
-        <div className={`form-group full-width ${errors.marriageIntent ? "has-error" : ""}`}>
-          <label>
-            What are you looking for? <span className="required-star">*</span>
-          </label>
-          <div className="intent-cards-stack">
-            {INTENT_OPTIONS.map((intent) => {
-              const isSelected = formData.marriageIntent === intent.id;
-              return (
-                <button
-                  type="button"
-                  key={intent.id}
-                  className={`intent-card ${isSelected ? "selected" : ""}`}
-                  onClick={() => updateField("marriageIntent", intent.id)}
-                >
-                  <div className="intent-radio-indicator">
-                    <span className="radio-outer">
-                      {isSelected && <span className="radio-inner" />}
-                    </span>
-                  </div>
-                  <div className="intent-text-content">
-                    <div className="intent-title-row">
-                      <h4>{intent.title}</h4>
-                      <span className="intent-badge">{intent.badge}</span>
-                    </div>
-                    <p>{intent.desc}</p>
-                  </div>
-                  {isSelected && <Check size={18} className="intent-check-mark" />}
-                </button>
-              );
-            })}
-          </div>
-          {errors.marriageIntent && <span className="error-msg">{errors.marriageIntent}</span>}
-        </div>
 
         {/* Short Bio / Introduction (Optional) */}
         <div className="form-group full-width">

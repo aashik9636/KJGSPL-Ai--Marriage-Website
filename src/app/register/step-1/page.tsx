@@ -1,7 +1,8 @@
 "use client";
 import React from "react";
 import { useRegistration } from "@/context/registration-context";
-import { ArrowRight, User, Mail, Phone, Calendar, MapPin, Sparkles } from "lucide-react";
+import { ArrowRight, User, Mail, Phone, Calendar, Sparkles } from "lucide-react";
+import { CityCountry } from "@/components/ui/city-country";
 
 const GENDER_OPTIONS = [
   { id: "Female", label: "Female" },
@@ -111,22 +112,17 @@ export default function Step1BasicDetailsPage() {
           {errors.dob && <span className="error-msg">{errors.dob}</span>}
         </div>
 
-        {/* Current City */}
+        {/* Current City / Location Autocomplete */}
         <div className={`form-group full-width ${errors.city ? "has-error" : ""}`}>
           <label htmlFor="city">
-            Current City <span className="required-star">*</span>
+            Current City / Location <span className="required-star">*</span>
           </label>
-          <div className="input-with-icon">
-            <MapPin size={16} className="field-icon" />
-            <input
-              id="city"
-              type="text"
-              placeholder="e.g. Dubai, UAE or Mumbai, India"
-              value={formData.city}
-              onChange={(e) => updateField("city", e.target.value)}
-              className="form-input"
-            />
-          </div>
+          <CityCountry
+            value={formData.city}
+            onChange={(fullLoc) => updateField("city", fullLoc)}
+            placeholder="Search city or country (e.g. Mumbai, Dubai, London...)"
+            hasError={!!errors.city}
+          />
           {errors.city && <span className="error-msg">{errors.city}</span>}
         </div>
 
